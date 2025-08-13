@@ -28,26 +28,46 @@
 
 ## 🚀 快速开始
 
+### 🌐 GitHub Pages 免费托管
+
+**GitHub Pages** 是 GitHub 提供的免费静态网站托管服务，你的网站将托管在：
+```
+https://你的用户名.github.io/Playbook-Door/
+```
+
 ### 1. Fork 仓库
 
 点击右上角的 "Fork" 按钮，将仓库 Fork 到你的 GitHub 账户。
 
-### 2. 克隆到本地
+### 2. 启用 GitHub Pages（重要！）
+
+1. 进入你 Fork 的仓库
+2. 点击 **Settings** 标签
+3. 在左侧菜单找到 **Pages**
+4. 在 "Source" 下拉菜单选择 **GitHub Actions**
+5. 保存设置
+
+### 3. 等待自动部署
+
+- 推送代码后，GitHub Actions 会自动构建和部署
+- 在 **Actions** 标签页查看部署进度
+- 通常需要 2-5 分钟完成
+
+### 4. 访问你的网站
+
+部署完成后访问：
+```
+https://你的用户名.github.io/Playbook-Door/
+```
+
+### 5. 本地开发（可选）
+
+如果需要本地开发：
 
 ```bash
 git clone https://github.com/你的用户名/Playbook-Door.git
 cd Playbook-Door
-```
-
-### 3. 安装依赖
-
-```bash
 npm install
-```
-
-### 4. 本地开发
-
-```bash
 npm run dev
 ```
 
@@ -218,6 +238,24 @@ git push origin main
    - 等待部署完成（通常 2-5 分钟）
    - 刷新你的网站页面
    - 新目录应该自动显示为卡片
+
+### 🌐 查找你的网站地址
+
+你的 GitHub Pages 网站地址可以在以下位置找到：
+
+1. **仓库设置页面**：
+   ```
+   仓库 → Settings → Pages → 顶部显示的地址
+   ```
+
+2. **地址规律**：
+   ```
+   https://你的用户名.github.io/Playbook-Door/
+   ```
+
+3. **示例**：
+   - 用户名：`john-doe` 
+   - 地址：`https://john-doe.github.io/Playbook-Door/`
 
 ### 目录分类规则
 
