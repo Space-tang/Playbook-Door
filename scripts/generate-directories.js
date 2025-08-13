@@ -21,33 +21,29 @@ function parseToml(content) {
         if (match) {
             const [, key, value] = match
 
+            // 先去掉注释
+            const cleanValue = value.split('#')[0].trim()
+
             // 处理不同类型的值
-            if (value.startsWith('[') && value.endsWith(']')) {
+            if (cleanValue.startsWith('[') && cleanValue.endsWith(']')) {
                 // 数组格式: ["item1", "item2"]
                 try {
-                    result[key] = JSON.parse(value)
+                    result[key] = JSON.parse(cleanValue)
                 } catch {
                     result[key] = []
                 }
-            } else if (value.startsWith("'") && value.endsWith("'")) {
+            } else if (cleanValue.startsWith("'") && cleanValue.endsWith("'")) {
                 // 字符串格式: 'value'
-                result[key] = value.slice(1, -1)
-            } else if (value.startsWith('"') && value.endsWith('"')) {
+                result[key] = cleanValue.slice(1, -1)
+            } else if (cleanValue.startsWith('"') && cleanValue.endsWith('"')) {
                 // 字符串格式: "value"
-                result[key] = value.slice(1, -1)
-            } else if (value === 'true' || value === 'false') {
+                result[key] = cleanValue.slice(1, -1)
+            } else if (cleanValue === 'true' || cleanValue === 'false') {
                 // 布尔值
-                result[key] = value === 'true'
+                result[key] = cleanValue === 'true'
             } else {
-                // 其他情况，去掉注释
-                const cleanValue = value.split('#')[0].trim()
-                if (cleanValue.startsWith("'") && cleanValue.endsWith("'")) {
-                    result[key] = cleanValue.slice(1, -1)
-                } else if (cleanValue.startsWith('"') && cleanValue.endsWith('"')) {
-                    result[key] = cleanValue.slice(1, -1)
-                } else {
-                    result[key] = cleanValue
-                }
+                // 其他情况
+                result[key] = cleanValue
             }
         }
     }
