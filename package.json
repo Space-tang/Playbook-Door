@@ -8,7 +8,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "npm run build && gh-pages -d dist"
+    "deploy": "npm run build && gh-pages -d dist",
+    "generate": "node scripts/generate-directories.js",
+    "build:full": "npm run generate && npm run build"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",

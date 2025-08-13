@@ -154,11 +154,7 @@ import {
     Link,
     Calendar,
     Files,
-    MoreFilled,
-    Folder,
-    Document,
-    Setting,
-    DataBoard
+    MoreFilled
 } from '@element-plus/icons-vue'
 
 // 响应式数据
@@ -170,22 +166,59 @@ const lastUpdateTime = ref('')
 // 目录数据（从 GitHub API 或生成的 JSON 文件获取）
 const directories = ref([])
 
-// 分类配置
-const categories = computed(() => [
-    { key: 'all', label: '全部', count: directories.value.length },
-    { key: 'template', label: '模板', count: directories.value.filter(d => d.category === 'template').length },
-    { key: 'api', label: 'API', count: directories.value.filter(d => d.category === 'api').length },
-    { key: 'database', label: '数据库', count: directories.value.filter(d => d.category === 'database').length },
-    { key: 'devops', label: 'DevOps', count: directories.value.filter(d => d.category === 'devops').length }
-])
+// 分类处理工具函数
+const normalizeCategory = (category) => {
+    // 处理空值、null、undefined，统一转换为 "未定义"
+    if (!category || category.trim() === '') {
+        return '未定义'
+    }
+    return category.trim()
+}
+
+const generateDynamicCategories = (directories) => {
+    // 1. 提取所有分类
+    const categorySet = new Set()
+    directories.forEach(dir => {
+        const category = normalizeCategory(dir.category)
+        categorySet.add(category)
+    })
+    
+    // 2. 生成分类对象
+    const dynamicCategories = Array.from(categorySet).map(category => ({
+        key: category,
+        label: category,
+        count: directories.filter(d => normalizeCategory(d.category) === category).length
+    }))
+    
+    // 3. 排序：字母顺序，未定义放最后
+    dynamicCategories.sort((a, b) => {
+        if (a.key === '未定义') return 1
+        if (b.key === '未定义') return -1
+        return a.key.localeCompare(b.key, 'zh-CN')
+    })
+    
+    // 4. 添加"全部"选项
+    return [
+        { key: 'all', label: '全部', count: directories.length },
+        ...dynamicCategories
+    ]
+}
+
+// 动态分类配置
+const categories = computed(() => {
+    return generateDynamicCategories(directories.value)
+})
 
 // 过滤后的目录列表
 const filteredDirectories = computed(() => {
     let result = directories.value
 
-    // 按分类过滤
+    // 按分类过滤 - 使用动态分类
     if (activeCategory.value !== 'all') {
-        result = result.filter(d => d.category === activeCategory.value)
+        result = result.filter(d => {
+            const normalizedCategory = normalizeCategory(d.category)
+            return normalizedCategory === activeCategory.value
+        })
     }
 
     // 按搜索关键词过滤
@@ -221,7 +254,12 @@ const fetchDirectoriesFromGitHub = async () => {
         const response = await fetch('./directories.json')
         if (response.ok) {
             const data = await response.json()
-            directories.value = data.directories || []
+            // 处理目录数据，确保每个项目都有有效的分类
+            const processedDirectories = (data.directories || []).map(dir => ({
+                ...dir,
+                category: dir.category || '未定义' // 为缺少 category 字段的目录项设置默认值
+            }))
+            directories.value = processedDirectories
             lastUpdateTime.value = formatDate(new Date(data.lastUpdate))
             console.log('成功获取目录数据:', data)
         } else {
@@ -235,7 +273,7 @@ const fetchDirectoriesFromGitHub = async () => {
                     fileCount: 5,
                     tags: ['示例', '演示'],
                     status: 'active',
-                    category: 'other',
+                    category: '未定义', // 使用默认分类
                     icon: 'Folder',
                     color: '#95a5a6'
                 }
@@ -245,6 +283,8 @@ const fetchDirectoriesFromGitHub = async () => {
     } catch (error) {
         console.error('获取目录数据失败:', error)
         ElMessage.error('获取目录数据失败，请稍后重试')
+        // 设置空数据状态
+        directories.value = []
     }
 }
 
@@ -465,6 +505,7 @@ onMounted(() => {
     margin: 0 0 16px 0;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }

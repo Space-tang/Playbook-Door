@@ -1,0 +1,5 @@
+title = 'My First Post' # 必填
+description = 'Docker 容器化配置、Kubernetes 部署文件、CI/CD 流水线脚本，实现应用的自动化部署和运维' # 必填
+class = "分类1" # 如果未定义, 默认：未定义
+tag = ["Docker","容器化"] # 如果未定义, 默认：空
+draft = false # 如果未定义， false, 也就是可以发布,true 就忽略。
