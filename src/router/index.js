@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 // 导入页面组件
-const Home = () => import('../view/HomeSimple.vue')
+const Home = () => import('../view/TestPage.vue')
 
 const routes = [
   {
