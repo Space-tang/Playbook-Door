@@ -1,172 +1,164 @@
 <template>
-  <div class="home-container">
-    <!-- 头部导航 -->
-    <header class="header">
-      <div class="header-content">
-        <div class="logo">
-          <h1>Playbook Door</h1>
-          <p>动态目录展示平台</p>
-        </div>
-        <div class="header-actions">
-          <el-button @click="refreshData" :loading="loading">
-            <el-icon><Refresh /></el-icon>
-            刷新
-          </el-button>
-          <el-button type="primary" @click="openGithubRepo">
-            <el-icon><Link /></el-icon>
-            GitHub 仓库
-          </el-button>
-        </div>
-      </div>
-    </header>
-
-    <!-- 主要内容区 -->
-    <main class="main-content">
-      <div class="content-wrapper">
-        <!-- 搜索和筛选 -->
-        <div class="search-section">
-          <div class="search-bar">
-            <el-input
-              v-model="searchKeyword"
-              placeholder="搜索目录..."
-              size="large"
-              clearable
-              @input="handleSearch"
-            >
-              <template #prefix>
-                <el-icon><Search /></el-icon>
-              </template>
-            </el-input>
-          </div>
-          <div class="filter-tabs">
-            <el-button-group>
-              <el-button 
-                v-for="category in categories" 
-                :key="category.key"
-                :type="activeCategory === category.key ? 'primary' : ''"
-                @click="setActiveCategory(category.key)"
-              >
-                {{ category.label }}
-                <el-badge :value="category.count" class="category-badge" />
-              </el-button>
-            </el-button-group>
-          </div>
-        </div>
-
-        <!-- 统计信息 -->
-        <div class="stats-section">
-          <div class="stat-item">
-            <span class="stat-number">{{ filteredDirectories.length }}</span>
-            <span class="stat-label">个目录</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-number">{{ lastUpdateTime }}</span>
-            <span class="stat-label">最后更新</span>
-          </div>
-        </div>
-
-        <!-- 目录卡片网格 -->
-        <div class="directories-grid">
-          <div 
-            v-for="directory in filteredDirectories" 
-            :key="directory.name"
-            class="directory-card"
-            @click="openDirectory(directory)"
-          >
-            <div class="card-header">
-              <div class="card-icon">
-                <el-icon :size="24" :color="directory.color">
-                  <component :is="directory.icon" />
-                </el-icon>
-              </div>
-              <div class="card-actions">
-                <el-dropdown @command="handleCardAction">
-                  <el-icon class="action-icon"><MoreFilled /></el-icon>
-                  <template #dropdown>
-                    <el-dropdown-menu>
-                      <el-dropdown-item :command="{action: 'view', data: directory}">
-                        查看详情
-                      </el-dropdown-item>
-                      <el-dropdown-item :command="{action: 'copy', data: directory}">
-                        复制路径
-                      </el-dropdown-item>
-                      <el-dropdown-item :command="{action: 'github', data: directory}">
-                        在 GitHub 中打开
-                      </el-dropdown-item>
-                    </el-dropdown-menu>
-                  </template>
-                </el-dropdown>
-              </div>
-            </div>
-            
-            <div class="card-content">
-              <h3 class="card-title">{{ directory.name }}</h3>
-              <p class="card-description">{{ directory.description }}</p>
-              
-              <div class="card-meta">
-                <div class="meta-item">
-                  <el-icon><Calendar /></el-icon>
-                  <span>{{ formatDate(directory.createdAt) }}</span>
+    <div class="home-container">
+        <!-- 头部导航 -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>Playbook Door</h1>
+                    <p>动态目录展示平台</p>
                 </div>
-                <div class="meta-item">
-                  <el-icon><Files /></el-icon>
-                  <span>{{ directory.fileCount }} 个文件</span>
+                <div class="header-actions">
+                    <el-button @click="refreshData" :loading="loading">
+                        <el-icon>
+                            <Refresh />
+                        </el-icon>
+                        刷新
+                    </el-button>
+                    <el-button type="primary" @click="openGithubRepo">
+                        <el-icon>
+                            <Link />
+                        </el-icon>
+                        GitHub 仓库
+                    </el-button>
                 </div>
-              </div>
-              
-              <div class="card-tags">
-                <el-tag 
-                  v-for="tag in directory.tags" 
-                  :key="tag"
-                  size="small"
-                  class="directory-tag"
-                >
-                  {{ tag }}
-                </el-tag>
-              </div>
             </div>
-            
-            <div class="card-footer">
-              <div class="update-info">
-                <span class="update-time">{{ formatRelativeTime(directory.updatedAt) }}</span>
-              </div>
-              <div class="card-status">
-                <el-tag 
-                  :type="directory.status === 'active' ? 'success' : 'info'"
-                  size="small"
-                >
-                  {{ directory.status === 'active' ? '活跃' : '静态' }}
-                </el-tag>
-              </div>
-            </div>
-          </div>
-        </div>
+        </header>
 
-        <!-- 空状态 -->
-        <div v-if="filteredDirectories.length === 0" class="empty-state">
-          <el-empty description="暂无目录数据">
-            <el-button type="primary" @click="refreshData">刷新数据</el-button>
-          </el-empty>
-        </div>
-      </div>
-    </main>
-  </div>
+        <!-- 主要内容区 -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <!-- 搜索和筛选 -->
+                <div class="search-section">
+                    <div class="search-bar">
+                        <el-input v-model="searchKeyword" placeholder="搜索目录..." size="large" clearable
+                            @input="handleSearch">
+                            <template #prefix>
+                                <el-icon>
+                                    <Search />
+                                </el-icon>
+                            </template>
+                        </el-input>
+                    </div>
+                    <div class="filter-tabs">
+                        <el-button-group>
+                            <el-button v-for="category in categories" :key="category.key"
+                                :type="activeCategory === category.key ? 'primary' : ''"
+                                @click="setActiveCategory(category.key)">
+                                {{ category.label }}
+                                <el-badge :value="category.count" class="category-badge" />
+                            </el-button>
+                        </el-button-group>
+                    </div>
+                </div>
+
+                <!-- 统计信息 -->
+                <div class="stats-section">
+                    <div class="stat-item">
+                        <span class="stat-number">{{ filteredDirectories.length }}</span>
+                        <span class="stat-label">个目录</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ lastUpdateTime }}</span>
+                        <span class="stat-label">最后更新</span>
+                    </div>
+                </div>
+
+                <!-- 目录卡片网格 -->
+                <div class="directories-grid">
+                    <div v-for="directory in filteredDirectories" :key="directory.name" class="directory-card"
+                        @click="openDirectory(directory)">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <el-icon :size="24" :color="directory.color">
+                                    <component :is="directory.icon" />
+                                </el-icon>
+                            </div>
+                            <div class="card-actions">
+                                <el-dropdown @command="handleCardAction">
+                                    <el-icon class="action-icon">
+                                        <MoreFilled />
+                                    </el-icon>
+                                    <template #dropdown>
+                                        <el-dropdown-menu>
+                                            <el-dropdown-item :command="{ action: 'view', data: directory }">
+                                                查看详情
+                                            </el-dropdown-item>
+                                            <el-dropdown-item :command="{ action: 'copy', data: directory }">
+                                                复制路径
+                                            </el-dropdown-item>
+                                            <el-dropdown-item :command="{ action: 'github', data: directory }">
+                                                在 GitHub 中打开
+                                            </el-dropdown-item>
+                                        </el-dropdown-menu>
+                                    </template>
+                                </el-dropdown>
+                            </div>
+                        </div>
+
+                        <div class="card-content">
+                            <h3 class="card-title">{{ directory.name }}</h3>
+                            <p class="card-description">{{ directory.description }}</p>
+
+                            <div class="card-meta">
+                                <div class="meta-item">
+                                    <el-icon>
+                                        <Calendar />
+                                    </el-icon>
+                                    <span>{{ formatDate(directory.createdAt) }}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <el-icon>
+                                        <Files />
+                                    </el-icon>
+                                    <span>{{ directory.fileCount }} 个文件</span>
+                                </div>
+                            </div>
+
+                            <div class="card-tags">
+                                <el-tag v-for="tag in directory.tags" :key="tag" size="small" class="directory-tag">
+                                    {{ tag }}
+                                </el-tag>
+                            </div>
+                        </div>
+
+                        <div class="card-footer">
+                            <div class="update-info">
+                                <span class="update-time">{{ formatRelativeTime(directory.updatedAt) }}</span>
+                            </div>
+                            <div class="card-status">
+                                <el-tag :type="directory.status === 'active' ? 'success' : 'info'" size="small">
+                                    {{ directory.status === 'active' ? '活跃' : '静态' }}
+                                </el-tag>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 空状态 -->
+                <div v-if="filteredDirectories.length === 0" class="empty-state">
+                    <el-empty description="暂无目录数据">
+                        <el-button type="primary" @click="refreshData">刷新数据</el-button>
+                    </el-empty>
+                </div>
+            </div>
+        </main>
+    </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
-  Search,
-  Refresh,
-  Link,
-  Calendar,
-  Files,
-  MoreFilled,
-  Folder,
-  Document,
-  Setting,
-  DataBoard
+    Search,
+    Refresh,
+    Link,
+    Calendar,
+    Files,
+    MoreFilled,
+    Folder,
+    Document,
+    Setting,
+    DataBoard
 } from '@element-plus/icons-vue'
 
 // 响应式数据
@@ -180,354 +172,365 @@ const directories = ref([])
 
 // 分类配置
 const categories = computed(() => [
-  { key: 'all', label: '全部', count: directories.value.length },
-  { key: 'template', label: '模板', count: directories.value.filter(d => d.category === 'template').length },
-  { key: 'api', label: 'API', count: directories.value.filter(d => d.category === 'api').length },
-  { key: 'database', label: '数据库', count: directories.value.filter(d => d.category === 'database').length },
-  { key: 'devops', label: 'DevOps', count: directories.value.filter(d => d.category === 'devops').length }
+    { key: 'all', label: '全部', count: directories.value.length },
+    { key: 'template', label: '模板', count: directories.value.filter(d => d.category === 'template').length },
+    { key: 'api', label: 'API', count: directories.value.filter(d => d.category === 'api').length },
+    { key: 'database', label: '数据库', count: directories.value.filter(d => d.category === 'database').length },
+    { key: 'devops', label: 'DevOps', count: directories.value.filter(d => d.category === 'devops').length }
 ])
 
 // 过滤后的目录列表
 const filteredDirectories = computed(() => {
-  let result = directories.value
+    let result = directories.value
 
-  // 按分类过滤
-  if (activeCategory.value !== 'all') {
-    result = result.filter(d => d.category === activeCategory.value)
-  }
+    // 按分类过滤
+    if (activeCategory.value !== 'all') {
+        result = result.filter(d => d.category === activeCategory.value)
+    }
 
-  // 按搜索关键词过滤
-  if (searchKeyword.value) {
-    const keyword = searchKeyword.value.toLowerCase()
-    result = result.filter(d => 
-      d.name.toLowerCase().includes(keyword) ||
-      d.description.toLowerCase().includes(keyword) ||
-      d.tags.some(tag => tag.toLowerCase().includes(keyword))
-    )
-  }
+    // 按搜索关键词过滤
+    if (searchKeyword.value) {
+        const keyword = searchKeyword.value.toLowerCase()
+        result = result.filter(d =>
+            d.name.toLowerCase().includes(keyword) ||
+            d.description.toLowerCase().includes(keyword) ||
+            d.tags.some(tag => tag.toLowerCase().includes(keyword))
+        )
+    }
 
-  return result
+    return result
 })
 
 // 方法
 const refreshData = async () => {
-  loading.value = true
-  try {
-    // 这里会调用 GitHub API 或读取生成的 JSON 文件
-    await fetchDirectoriesFromGitHub()
-    ElMessage.success('数据刷新成功')
-    lastUpdateTime.value = formatDate(new Date())
-  } catch (error) {
-    ElMessage.error('数据刷新失败')
-  } finally {
-    loading.value = false
-  }
+    loading.value = true
+    try {
+        await fetchDirectoriesFromGitHub()
+        ElMessage.success('数据刷新成功')
+        lastUpdateTime.value = formatDate(new Date())
+    } catch (error) {
+        ElMessage.error('数据刷新失败')
+    } finally {
+        loading.value = false
+    }
 }
 
 const fetchDirectoriesFromGitHub = async () => {
-  try {
-    // 导入 GitHub API
-    const { default: githubApi } = await import('../api/modules/github.js')
-    
-    // 获取目录数据
-    const data = await githubApi.getRepositoryDirectories()
-    directories.value = data
-    
-    // 获取最后更新时间
-    const lastUpdate = await githubApi.getRepositoryLastUpdate()
-    lastUpdateTime.value = formatDate(new Date(lastUpdate))
-    
-    console.log('成功获取目录数据:', data)
-  } catch (error) {
-    console.error('获取目录数据失败:', error)
-    ElMessage.error('获取目录数据失败，请稍后重试')
-  }
+    try {
+        // 首先尝试从本地 JSON 文件获取数据
+        const response = await fetch('./directories.json')
+        if (response.ok) {
+            const data = await response.json()
+            directories.value = data.directories || []
+            lastUpdateTime.value = formatDate(new Date(data.lastUpdate))
+            console.log('成功获取目录数据:', data)
+        } else {
+            // 如果没有 JSON 文件，使用示例数据
+            directories.value = [
+                {
+                    name: 'example-project',
+                    description: '这是一个示例项目，展示 Playbook Door 的功能。请在仓库中添加你的项目目录。',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    fileCount: 5,
+                    tags: ['示例', '演示'],
+                    status: 'active',
+                    category: 'other',
+                    icon: 'Folder',
+                    color: '#95a5a6'
+                }
+            ]
+            lastUpdateTime.value = formatDate(new Date())
+        }
+    } catch (error) {
+        console.error('获取目录数据失败:', error)
+        ElMessage.error('获取目录数据失败，请稍后重试')
+    }
 }
 
 const handleSearch = () => {
-  // 搜索逻辑已在 computed 中处理
+    // 搜索逻辑已在 computed 中处理
 }
 
 const setActiveCategory = (category) => {
-  activeCategory.value = category
+    activeCategory.value = category
 }
 
 const openDirectory = (directory) => {
-  // 打开目录详情或跳转到对应页面
-  ElMessage.info(`打开目录: ${directory.name}`)
+    ElMessage.info(`打开目录: ${directory.name}`)
 }
 
 const openGithubRepo = () => {
-  window.open('https://github.com/Space-tang/Playbook-Door', '_blank')
+    window.open('https://github.com/Space-tang/Playbook-Door', '_blank')
 }
 
 const handleCardAction = ({ action, data }) => {
-  switch (action) {
-    case 'view':
-      ElMessage.info(`查看 ${data.name} 详情`)
-      break
-    case 'copy':
-      navigator.clipboard.writeText(`https://github.com/Space-tang/Playbook-Door/tree/main/${data.name}`)
-      ElMessage.success('路径已复制到剪贴板')
-      break
-    case 'github':
-      window.open(`https://github.com/Space-tang/Playbook-Door/tree/main/${data.name}`, '_blank')
-      break
-  }
+    switch (action) {
+        case 'view':
+            ElMessage.info(`查看 ${data.name} 详情`)
+            break
+        case 'copy':
+            navigator.clipboard.writeText(`https://github.com/Space-tang/Playbook-Door/tree/main/${data.name}`)
+            ElMessage.success('路径已复制到剪贴板')
+            break
+        case 'github':
+            window.open(`https://github.com/Space-tang/Playbook-Door/tree/main/${data.name}`, '_blank')
+            break
+    }
 }
 
 const formatDate = (date) => {
-  return new Date(date).toLocaleDateString('zh-CN')
+    return new Date(date).toLocaleDateString('zh-CN')
 }
 
 const formatRelativeTime = (date) => {
-  const now = new Date()
-  const target = new Date(date)
-  const diff = now - target
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-  
-  if (days === 0) return '今天更新'
-  if (days === 1) return '昨天更新'
-  if (days < 7) return `${days}天前更新`
-  if (days < 30) return `${Math.floor(days / 7)}周前更新`
-  return `${Math.floor(days / 30)}个月前更新`
+    const now = new Date()
+    const target = new Date(date)
+    const diff = now - target
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+
+    if (days === 0) return '今天更新'
+    if (days === 1) return '昨天更新'
+    if (days < 7) return `${days}天前更新`
+    if (days < 30) return `${Math.floor(days / 7)}周前更新`
+    return `${Math.floor(days / 30)}个月前更新`
 }
 
 // 生命周期
 onMounted(() => {
-  refreshData()
+    refreshData()
 })
 </script>
 
 <style scoped>
 .home-container {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .header {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .logo h1 {
-  font-size: 24px;
-  font-weight: 700;
-  color: #2c3e50;
-  margin: 0 0 4px 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0 0 4px 0;
 }
 
 .logo p {
-  font-size: 14px;
-  color: #7f8c8d;
-  margin: 0;
+    font-size: 14px;
+    color: #7f8c8d;
+    margin: 0;
 }
 
 .header-actions {
-  display: flex;
-  gap: 12px;
+    display: flex;
+    gap: 12px;
 }
 
 .main-content {
-  padding: 40px 24px;
+    padding: 40px 24px;
 }
 
 .content-wrapper {
-  max-width: 1200px;
-  margin: 0 auto;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .search-section {
-  margin-bottom: 32px;
+    margin-bottom: 32px;
 }
 
 .search-bar {
-  margin-bottom: 20px;
+    margin-bottom: 20px;
 }
 
 .search-bar .el-input {
-  max-width: 400px;
+    max-width: 400px;
 }
 
 .filter-tabs {
-  display: flex;
-  gap: 8px;
+    display: flex;
+    gap: 8px;
 }
 
 .category-badge {
-  margin-left: 8px;
+    margin-left: 8px;
 }
 
 .stats-section {
-  display: flex;
-  gap: 32px;
-  margin-bottom: 32px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
+    display: flex;
+    gap: 32px;
+    margin-bottom: 32px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
 }
 
 .stat-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .stat-number {
-  font-size: 24px;
-  font-weight: 700;
-  color: #2c3e50;
+    font-size: 24px;
+    font-weight: 700;
+    color: #2c3e50;
 }
 
 .stat-label {
-  font-size: 14px;
-  color: #7f8c8d;
-  margin-top: 4px;
+    font-size: 14px;
+    color: #7f8c8d;
+    margin-top: 4px;
 }
 
 .directories-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 24px;
 }
 
 .directory-card {
-  background: white;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-  cursor: pointer;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .directory-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
 
 .card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
 }
 
 .card-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: rgba(64, 158, 255, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(64, 158, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .action-icon {
-  color: #bdc3c7;
-  cursor: pointer;
-  transition: color 0.3s;
+    color: #bdc3c7;
+    cursor: pointer;
+    transition: color 0.3s;
 }
 
 .action-icon:hover {
-  color: #7f8c8d;
+    color: #7f8c8d;
 }
 
 .card-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #2c3e50;
-  margin: 0 0 8px 0;
-  line-height: 1.4;
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0 0 8px 0;
+    line-height: 1.4;
 }
 
 .card-description {
-  font-size: 14px;
-  color: #7f8c8d;
-  line-height: 1.6;
-  margin: 0 0 16px 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+    font-size: 14px;
+    color: #7f8c8d;
+    line-height: 1.6;
+    margin: 0 0 16px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .card-meta {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 16px;
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
 }
 
 .meta-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  color: #95a5a6;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #95a5a6;
 }
 
 .card-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
 }
 
 .directory-tag {
-  font-size: 12px;
+    font-size: 12px;
 }
 
 .card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 16px;
-  border-top: 1px solid #f8f9fa;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid #f8f9fa;
 }
 
 .update-time {
-  font-size: 12px;
-  color: #bdc3c7;
+    font-size: 12px;
+    color: #bdc3c7;
 }
 
 .empty-state {
-  text-align: center;
-  padding: 60px 20px;
+    text-align: center;
+    padding: 60px 20px;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .header-content {
-    flex-direction: column;
-    gap: 16px;
-    text-align: center;
-  }
-  
-  .directories-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .stats-section {
-    flex-direction: column;
-    gap: 16px;
-  }
-  
-  .filter-tabs .el-button-group {
-    flex-wrap: wrap;
-  }
+    .header-content {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+    }
+
+    .directories-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-section {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .filter-tabs .el-button-group {
+        flex-wrap: wrap;
+    }
 }
 </style>
