@@ -30,8 +30,7 @@
                 <!-- 搜索和筛选 -->
                 <div class="search-section">
                     <div class="search-bar">
-                        <el-input v-model="searchKeyword" placeholder="搜索目录..." size="large" clearable
-                            @input="handleSearch">
+                        <el-input v-model="searchKeyword" placeholder="搜索目录..." size="large" clearable>
                             <template #prefix>
                                 <el-icon>
                                     <Search />
@@ -72,26 +71,6 @@
                                 <el-icon :size="24" :color="directory.color">
                                     <component :is="directory.icon" />
                                 </el-icon>
-                            </div>
-                            <div class="card-actions">
-                                <el-dropdown @command="handleCardAction">
-                                    <el-icon class="action-icon">
-                                        <MoreFilled />
-                                    </el-icon>
-                                    <template #dropdown>
-                                        <el-dropdown-menu>
-                                            <el-dropdown-item :command="{ action: 'view', data: directory }">
-                                                查看详情
-                                            </el-dropdown-item>
-                                            <el-dropdown-item :command="{ action: 'copy', data: directory }">
-                                                复制路径
-                                            </el-dropdown-item>
-                                            <el-dropdown-item :command="{ action: 'github', data: directory }">
-                                                在 GitHub 中打开
-                                            </el-dropdown-item>
-                                        </el-dropdown-menu>
-                                    </template>
-                                </el-dropdown>
                             </div>
                         </div>
 
@@ -153,8 +132,7 @@ import {
     Refresh,
     Link,
     Calendar,
-    Files,
-    MoreFilled
+    Files
 } from '@element-plus/icons-vue'
 
 // 响应式数据
@@ -182,21 +160,21 @@ const generateDynamicCategories = (directories) => {
         const category = normalizeCategory(dir.category)
         categorySet.add(category)
     })
-    
+
     // 2. 生成分类对象
     const dynamicCategories = Array.from(categorySet).map(category => ({
         key: category,
         label: category,
         count: directories.filter(d => normalizeCategory(d.category) === category).length
     }))
-    
+
     // 3. 排序：字母顺序，未定义放最后
     dynamicCategories.sort((a, b) => {
         if (a.key === '未定义') return 1
         if (b.key === '未定义') return -1
         return a.key.localeCompare(b.key, 'zh-CN')
     })
-    
+
     // 4. 添加"全部"选项
     return [
         { key: 'all', label: '全部', count: directories.length },
@@ -263,21 +241,8 @@ const fetchDirectoriesFromGitHub = async () => {
             lastUpdateTime.value = formatDate(new Date(data.lastUpdate))
             console.log('成功获取目录数据:', data)
         } else {
-            // 如果没有 JSON 文件，使用示例数据
-            directories.value = [
-                {
-                    name: 'example-project',
-                    description: '这是一个示例项目，展示 Playbook Door 的功能。请在仓库中添加你的项目目录。',
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                    fileCount: 5,
-                    tags: ['示例', '演示'],
-                    status: 'active',
-                    category: '未定义', // 使用默认分类
-                    icon: 'Folder',
-                    color: '#95a5a6'
-                }
-            ]
+            // 如果没有 JSON 文件，设置空数据
+            directories.value = []
             lastUpdateTime.value = formatDate(new Date())
         }
     } catch (error) {
@@ -288,36 +253,23 @@ const fetchDirectoriesFromGitHub = async () => {
     }
 }
 
-const handleSearch = () => {
-    // 搜索逻辑已在 computed 中处理
-}
+
 
 const setActiveCategory = (category) => {
     activeCategory.value = category
 }
 
 const openDirectory = (directory) => {
-    ElMessage.info(`打开目录: ${directory.name}`)
+    // 直接跳转到 GitHub 目录
+    const githubUrl = `https://github.com/Space-tang/Playbook-Door/tree/main/${directory.name}`
+    window.open(githubUrl, '_blank')
 }
 
 const openGithubRepo = () => {
     window.open('https://github.com/Space-tang/Playbook-Door', '_blank')
 }
 
-const handleCardAction = ({ action, data }) => {
-    switch (action) {
-        case 'view':
-            ElMessage.info(`查看 ${data.name} 详情`)
-            break
-        case 'copy':
-            navigator.clipboard.writeText(`https://github.com/Space-tang/Playbook-Door/tree/main/${data.name}`)
-            ElMessage.success('路径已复制到剪贴板')
-            break
-        case 'github':
-            window.open(`https://github.com/Space-tang/Playbook-Door/tree/main/${data.name}`, '_blank')
-            break
-    }
-}
+
 
 const formatDate = (date) => {
     return new Date(date).toLocaleDateString('zh-CN')
@@ -465,7 +417,7 @@ onMounted(() => {
 
 .card-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     margin-bottom: 16px;
 }
@@ -480,15 +432,7 @@ onMounted(() => {
     justify-content: center;
 }
 
-.action-icon {
-    color: #bdc3c7;
-    cursor: pointer;
-    transition: color 0.3s;
-}
 
-.action-icon:hover {
-    color: #7f8c8d;
-}
 
 .card-title {
     font-size: 18px;
