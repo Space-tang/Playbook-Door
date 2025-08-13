@@ -219,6 +219,24 @@ GitHub Actions 会在以下情况自动运行：
 - ✅ **创建 Pull Request**
 - ✅ **手动触发** (在 Actions 页面)
 - ✅ **定时任务** (每天凌晨自动检查)
+- ✅ **检测到 `__meta__.txt` 文件变化**
+
+#### 🔄 手动更新
+
+如果别人直接在 GitHub 网页上创建项目，或者自动更新没有生效，可以手动触发：
+
+**方法 1：通过 GitHub 界面**
+1. 进入仓库 → Actions 标签页
+2. 点击 "Manual Update Directories"
+3. 点击 "Run workflow" 按钮
+
+**方法 2：通过空提交**
+```bash
+git commit --allow-empty -m "触发目录更新"
+git push origin main
+```
+
+详细说明请查看 [HOW-TO-UPDATE.md](HOW-TO-UPDATE.md)
 
 #### 2. 检测过程
 

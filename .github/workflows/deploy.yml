@@ -3,11 +3,22 @@ name: Build and Deploy to GitHub Pages
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
+    inputs:
+      force_update:
+        description: '强制更新目录数据'
+        required: false
+        default: 'false'
+        type: boolean
+  schedule:
+    # 每天凌晨 2 点自动运行一次，检查是否有新的项目
+    - cron: '0 2 * * *'
 
 # 设置 GITHUB_TOKEN 的权限
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -24,6 +35,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
       
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -31,13 +44,48 @@ jobs:
         node-version: '20'
         
     - name: Install dependencies
-      run: |
-        npm install
+      run: npm install
         
     - name: Generate directories data
       run: |
-        # 使用我们的目录生成脚本
+        echo "🔍 开始扫描项目目录..."
         npm run generate
+        echo "📊 扫描完成"
+        
+    - name: Show detected directories
+      run: |
+        echo "📋 检测到的项目："
+        if [ -f public/directories.json ]; then
+          node -e "
+            const data = JSON.parse(require('fs').readFileSync('public/directories.json', 'utf8'));
+            console.log(\`总项目数: \${data.totalCount}\`);
+            data.directories.forEach(dir => {
+              console.log(\`  - \${dir.name} (分类: \${dir.category})\`);
+            });
+          "
+        else
+          echo "❌ 未找到 directories.json 文件"
+        fi
+        
+    - name: Check for data changes
+      id: changes
+      run: |
+        if git diff --quiet public/directories.json; then
+          echo "changed=false" >> $GITHUB_OUTPUT
+          echo "📋 目录数据没有变化"
+        else
+          echo "changed=true" >> $GITHUB_OUTPUT
+          echo "✨ 检测到目录数据变化"
+        fi
+        
+    - name: Commit updated data
+      if: steps.changes.outputs.changed == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add public/directories.json
+        git commit -m "🤖 自动更新目录数据 [skip ci]"
+        git push
         
     - name: Build application
       run: npm run build
