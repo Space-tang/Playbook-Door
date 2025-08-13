@@ -12,6 +12,9 @@ on:
         required: false
         default: 'false'
         type: boolean
+  # 当 submodule 更新时也触发
+  repository_dispatch:
+    types: [submodule-update]
   schedule:
     # 每天凌晨 2 点自动运行一次，检查是否有新的项目
     - cron: '0 2 * * *'
@@ -36,6 +39,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
+        submodules: recursive
         token: ${{ secrets.GITHUB_TOKEN }}
       
     - name: Setup Node.js
@@ -46,9 +50,11 @@ jobs:
     - name: Install dependencies
       run: npm install
         
-    - name: Generate directories data
+    - name: Update submodule and generate directories data
       run: |
-        echo "🔍 开始扫描项目目录..."
+        echo "� 更始新 submodule..."
+        git submodule update --remote --merge
+        echo "� 开始扫描项目目录..."
         npm run generate
         echo "📊 扫描完成"
         

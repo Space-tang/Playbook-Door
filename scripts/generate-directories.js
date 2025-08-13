@@ -54,13 +54,20 @@ function parseToml(content) {
 // 扫描目录获取所有项目
 function scanDirectories(rootPath) {
     const directories = []
+    const playbookPath = path.join(rootPath, 'playbook')
+    
+    // 检查 playbook 目录是否存在
+    if (!fs.existsSync(playbookPath)) {
+        console.log('playbook 目录不存在，跳过扫描')
+        return directories
+    }
 
     try {
-        const items = fs.readdirSync(rootPath, { withFileTypes: true })
+        const items = fs.readdirSync(playbookPath, { withFileTypes: true })
 
         for (const item of items) {
             if (item.isDirectory() && !item.name.startsWith('.')) {
-                const dirPath = path.join(rootPath, item.name)
+                const dirPath = path.join(playbookPath, item.name)
                 const metaPath = path.join(dirPath, '__meta__.txt')
 
                 if (fs.existsSync(metaPath)) {
@@ -82,6 +89,7 @@ function scanDirectories(rootPath) {
 
                         const directory = {
                             name: meta.title || item.name,
+                            directoryName: item.name, // 保存实际的目录名用于跳转
                             description: meta.description || '暂无描述',
                             createdAt: stats.birthtime.toISOString(),
                             updatedAt: stats.mtime.toISOString(),

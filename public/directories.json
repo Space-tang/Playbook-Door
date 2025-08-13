@@ -1,5 +1,36 @@
 {
-  "lastUpdate": "2025-08-13T12:04:02.074Z",
-  "totalCount": 0,
-  "directories": []
+  "lastUpdate": "2025-08-13T12:26:37.684Z",
+  "totalCount": 2,
+  "directories": [
+    {
+      "name": "测试1",
+      "directoryName": "test1",
+      "description": "现在是测试场景111",
+      "createdAt": "2025-08-13T12:07:49.148Z",
+      "updatedAt": "2025-08-13T12:07:49.148Z",
+      "fileCount": 1,
+      "tags": [
+        "测试1"
+      ],
+      "status": "active",
+      "category": "测试1",
+      "icon": "Document",
+      "color": "#409EFF"
+    },
+    {
+      "name": "测试2",
+      "directoryName": "test2",
+      "description": "现在是测试场景222",
+      "createdAt": "2025-08-13T12:07:49.148Z",
+      "updatedAt": "2025-08-13T12:07:49.148Z",
+      "fileCount": 1,
+      "tags": [
+        "测试2"
+      ],
+      "status": "active",
+      "category": "测试2",
+      "icon": "Document",
+      "color": "#409EFF"
+    }
+  ]
 }

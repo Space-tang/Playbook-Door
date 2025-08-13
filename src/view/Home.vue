@@ -260,8 +260,9 @@ const setActiveCategory = (category) => {
 }
 
 const openDirectory = (directory) => {
-    // 直接跳转到 GitHub 目录
-    const githubUrl = `https://github.com/Space-tang/Playbook-Door/tree/main/${directory.name}`
+    // 跳转到 PlayBook 仓库的对应目录，使用实际的目录名
+    const directoryName = directory.directoryName || directory.name
+    const githubUrl = `https://github.com/Space-tang/PlayBook/tree/main/${directoryName}`
     window.open(githubUrl, '_blank')
 }
 
