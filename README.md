@@ -94,6 +94,21 @@ npm run dev
    - 在 "Workflow permissions" 部分选择 `Read and write permissions`
    - 勾选 `Allow GitHub Actions to create and approve pull requests`
 
+### 🔧 如果遇到构建错误
+
+如果 GitHub Actions 构建失败，常见解决方案：
+
+1. **Node.js 版本问题**：
+   - 工作流已配置使用 Node.js 20
+   - 本地开发建议使用 Node.js 18+ 版本
+
+2. **依赖安装问题**：
+   - 工作流会自动清理并重新安装依赖
+   - 本地可运行: `rm -rf node_modules package-lock.json && npm install`
+
+3. **权限问题**：
+   - 确保 Actions 有写入权限（参考上面的权限配置）
+
 ### 步骤 2: 启用 GitHub Pages
 
 1. **进入 Pages 设置**

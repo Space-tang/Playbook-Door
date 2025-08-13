@@ -3,13 +3,7 @@ name: Build and Deploy to GitHub Pages
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  # 手动触发
   workflow_dispatch:
-  # 定时任务，每天检查一次
-  schedule:
-    - cron: '0 0 * * *'
 
 # 设置 GITHUB_TOKEN 的权限
 permissions:
@@ -17,14 +11,14 @@ permissions:
   pages: write
   id-token: write
 
-# 只允许一个并发部署，跳过正在运行和最新队列之间的运行队列
+# 只允许一个并发部署
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
-  # 构建作业
-  build:
+  # 构建和部署作业
+  build-and-deploy:
     runs-on: ubuntu-latest
     
     steps:
@@ -34,11 +28,11 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
-        cache: 'npm'
+        node-version: '20'
         
     - name: Install dependencies
-      run: npm ci
+      run: |
+        npm install
         
     - name: Generate directories data
       run: |
@@ -49,129 +43,151 @@ jobs:
         
         // 获取所有目录
         function getDirectories(dirPath) {
-          const items = fs.readdirSync(dirPath, { withFileTypes: true });
-          return items
-            .filter(item => item.isDirectory())
-            .filter(item => !item.name.startsWith('.') && 
-                           item.name !== 'node_modules' && 
-                           item.name !== 'dist' &&
-                           item.name !== 'src' &&
-                           item.name !== 'public')
-            .map(item => {
-              const fullPath = path.join(dirPath, item.name);
-              return analyzeDirectory(item.name, fullPath);
-            });
+          try {
+            const items = fs.readdirSync(dirPath, { withFileTypes: true });
+            return items
+              .filter(item => item.isDirectory())
+              .filter(item => !item.name.startsWith('.') && 
+                             item.name !== 'node_modules' && 
+                             item.name !== 'dist' &&
+                             item.name !== 'src' &&
+                             item.name !== 'public')
+              .map(item => {
+                const fullPath = path.join(dirPath, item.name);
+                return analyzeDirectory(item.name, fullPath);
+              });
+          } catch (error) {
+            console.error('读取目录失败:', error);
+            return [];
+          }
         }
         
         // 分析目录信息
         function analyzeDirectory(dirName, dirPath) {
-          const stats = fs.statSync(dirPath);
           let description = '暂无描述';
           let tags = [];
           let category = 'other';
           let fileCount = 0;
           
           try {
+            const stats = fs.statSync(dirPath);
+            
             // 计算文件数量
-            const files = getAllFiles(dirPath);
-            fileCount = files.length;
-          } catch (e) {
-            console.warn(`无法读取目录 ${dirName}:`, e.message);
-          }
-          
-          // 尝试读取 README 文件
-          const readmeFiles = ['README.md', 'readme.md', 'README.txt', 'readme.txt'];
-          for (const readmeFile of readmeFiles) {
-            const readmePath = path.join(dirPath, readmeFile);
-            if (fs.existsSync(readmePath)) {
-              try {
-                const content = fs.readFileSync(readmePath, 'utf8');
-                const lines = content.split('\n').filter(line => line.trim());
-                // 找到第一个非标题行作为描述
-                const descLine = lines.find(line => 
-                  line.trim() && 
-                  !line.startsWith('#') && 
-                  !line.startsWith('!') &&
-                  line.length > 10
-                );
-                if (descLine) {
-                  description = descLine.trim().substring(0, 150);
-                }
-              } catch (e) {
-                console.warn(`读取 README 失败: ${readmePath}`);
-              }
-              break;
-            }
-          }
-          
-          // 尝试读取 package.json
-          const packagePath = path.join(dirPath, 'package.json');
-          if (fs.existsSync(packagePath)) {
             try {
-              const packageData = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
-              if (packageData.description) {
-                description = packageData.description;
-              }
-              if (packageData.keywords && Array.isArray(packageData.keywords)) {
-                tags = packageData.keywords.slice(0, 4);
-              }
-              category = 'frontend';
+              const files = getAllFiles(dirPath);
+              fileCount = files.length;
             } catch (e) {
-              console.warn(`解析 package.json 失败: ${packagePath}`);
+              console.warn(`无法计算文件数量 ${dirName}:`, e.message);
             }
+            
+            // 尝试读取 README 文件
+            const readmeFiles = ['README.md', 'readme.md', 'README.txt'];
+            for (const readmeFile of readmeFiles) {
+              const readmePath = path.join(dirPath, readmeFile);
+              if (fs.existsSync(readmePath)) {
+                try {
+                  const content = fs.readFileSync(readmePath, 'utf8');
+                  const lines = content.split('\n').filter(line => line.trim());
+                  const descLine = lines.find(line => 
+                    line.trim() && 
+                    !line.startsWith('#') && 
+                    !line.startsWith('!') &&
+                    line.length > 10
+                  );
+                  if (descLine) {
+                    description = descLine.trim().substring(0, 150);
+                  }
+                } catch (e) {
+                  console.warn(`读取 README 失败: ${readmePath}`);
+                }
+                break;
+              }
+            }
+            
+            // 尝试读取 package.json
+            const packagePath = path.join(dirPath, 'package.json');
+            if (fs.existsSync(packagePath)) {
+              try {
+                const packageData = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+                if (packageData.description) {
+                  description = packageData.description;
+                }
+                if (packageData.keywords && Array.isArray(packageData.keywords)) {
+                  tags = packageData.keywords.slice(0, 4);
+                }
+                category = 'frontend';
+              } catch (e) {
+                console.warn(`解析 package.json 失败: ${packagePath}`);
+              }
+            }
+            
+            // 根据目录名推断分类
+            const dirNameLower = dirName.toLowerCase();
+            if (dirNameLower.includes('template') || dirNameLower.includes('starter')) {
+              category = 'template';
+              tags = [...tags, '模板'];
+            } else if (dirNameLower.includes('api') || dirNameLower.includes('backend')) {
+              category = 'api';
+              tags = [...tags, 'API'];
+            } else if (dirNameLower.includes('database') || dirNameLower.includes('db')) {
+              category = 'database';
+              tags = [...tags, '数据库'];
+            } else if (dirNameLower.includes('deploy') || dirNameLower.includes('docker')) {
+              category = 'devops';
+              tags = [...tags, '部署'];
+            }
+            
+            // 去重标签
+            tags = [...new Set(tags)];
+            
+            // 获取图标和颜色
+            const { icon, color } = getCategoryStyle(category);
+            
+            return {
+              name: dirName,
+              description,
+              createdAt: stats.birthtime ? stats.birthtime.toISOString() : new Date().toISOString(),
+              updatedAt: stats.mtime ? stats.mtime.toISOString() : new Date().toISOString(),
+              fileCount,
+              tags,
+              status: 'active',
+              category,
+              icon,
+              color
+            };
+          } catch (error) {
+            console.error(`分析目录 ${dirName} 失败:`, error);
+            return {
+              name: dirName,
+              description: '暂无描述',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              fileCount: 0,
+              tags: [],
+              status: 'static',
+              category: 'other',
+              icon: 'Folder',
+              color: '#95a5a6'
+            };
           }
-          
-          // 根据目录名推断分类
-          const dirNameLower = dirName.toLowerCase();
-          if (dirNameLower.includes('template') || dirNameLower.includes('starter')) {
-            category = 'template';
-            tags = [...tags, '模板'];
-          } else if (dirNameLower.includes('api') || dirNameLower.includes('backend') || dirNameLower.includes('server')) {
-            category = 'api';
-            tags = [...tags, 'API', '后端'];
-          } else if (dirNameLower.includes('database') || dirNameLower.includes('db') || dirNameLower.includes('sql')) {
-            category = 'database';
-            tags = [...tags, '数据库'];
-          } else if (dirNameLower.includes('deploy') || dirNameLower.includes('docker') || dirNameLower.includes('k8s') || dirNameLower.includes('kubernetes')) {
-            category = 'devops';
-            tags = [...tags, '部署', 'DevOps'];
-          } else if (dirNameLower.includes('frontend') || dirNameLower.includes('web') || dirNameLower.includes('ui')) {
-            category = 'frontend';
-            tags = [...tags, '前端'];
-          }
-          
-          // 去重标签
-          tags = [...new Set(tags)];
-          
-          // 获取图标和颜色
-          const { icon, color } = getCategoryStyle(category);
-          
-          return {
-            name: dirName,
-            description,
-            createdAt: stats.birthtime.toISOString(),
-            updatedAt: stats.mtime.toISOString(),
-            fileCount,
-            tags,
-            status: 'active',
-            category,
-            icon,
-            color
-          };
         }
         
         // 递归获取所有文件
         function getAllFiles(dirPath) {
           let files = [];
-          const items = fs.readdirSync(dirPath, { withFileTypes: true });
-          
-          for (const item of items) {
-            const fullPath = path.join(dirPath, item.name);
-            if (item.isDirectory()) {
-              files = files.concat(getAllFiles(fullPath));
-            } else {
-              files.push(fullPath);
+          try {
+            const items = fs.readdirSync(dirPath, { withFileTypes: true });
+            
+            for (const item of items) {
+              const fullPath = path.join(dirPath, item.name);
+              if (item.isDirectory()) {
+                files = files.concat(getAllFiles(fullPath));
+              } else {
+                files.push(fullPath);
+              }
             }
+          } catch (error) {
+            console.warn(`读取目录文件失败: ${dirPath}`, error.message);
           }
           
           return files;
@@ -194,6 +210,7 @@ jobs:
         // 主函数
         function main() {
           try {
+            console.log('🔍 开始扫描目录...');
             const directories = getDirectories('.');
             const data = {
               lastUpdate: new Date().toISOString(),
@@ -201,21 +218,36 @@ jobs:
               directories
             };
             
-            // 写入到 public 目录，供前端访问
+            // 确保 public 目录存在
             if (!fs.existsSync('public')) {
               fs.mkdirSync('public', { recursive: true });
             }
             
+            // 写入数据文件
             fs.writeFileSync('public/directories.json', JSON.stringify(data, null, 2));
             console.log(`✅ 成功生成目录信息，共 ${directories.length} 个目录`);
             
-            // 输出目录列表供调试
-            directories.forEach(dir => {
-              console.log(`📁 ${dir.name} (${dir.category}): ${dir.description.substring(0, 50)}...`);
-            });
+            // 输出目录列表
+            if (directories.length > 0) {
+              console.log('\n📁 检测到的目录:');
+              directories.forEach(dir => {
+                console.log(`  - ${dir.name} (${dir.category}): ${dir.description.substring(0, 50)}...`);
+              });
+            } else {
+              console.log('⚠️  未检测到任何项目目录');
+            }
           } catch (error) {
             console.error('❌ 生成目录信息失败:', error);
-            process.exit(1);
+            // 创建空数据文件，避免构建失败
+            const emptyData = {
+              lastUpdate: new Date().toISOString(),
+              totalCount: 0,
+              directories: []
+            };
+            if (!fs.existsSync('public')) {
+              fs.mkdirSync('public', { recursive: true });
+            }
+            fs.writeFileSync('public/directories.json', JSON.stringify(emptyData, null, 2));
           }
         }
         
@@ -235,15 +267,7 @@ jobs:
       uses: actions/upload-pages-artifact@v3
       with:
         path: './dist'
-
-  # 部署作业
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+        
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
