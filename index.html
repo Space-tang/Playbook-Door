@@ -1,13 +1,22 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Vue</title>
+    <title>Playbook Door - 动态目录展示平台</title>
+    <meta name="description" content="动态目录展示平台，自动同步 GitHub 仓库中的目录结构" />
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <!-- 加载提示 -->
+      <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Arial, sans-serif;">
+        <div style="text-align: center;">
+          <h2>Playbook Door 加载中...</h2>
+          <p>如果页面长时间没有加载，请检查浏览器控制台是否有错误信息</p>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
