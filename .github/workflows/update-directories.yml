@@ -1,0 +1,215 @@
+name: Update Directories
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  # 手动触发
+  workflow_dispatch:
+  # 定时任务，每天检查一次
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  update-directories:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Generate directories data
+      run: |
+        # 创建目录信息生成脚本
+        cat > generate-directories.js << 'EOF'
+        const fs = require('fs');
+        const path = require('path');
+        
+        // 获取所有目录
+        function getDirectories(dirPath) {
+          const items = fs.readdirSync(dirPath, { withFileTypes: true });
+          return items
+            .filter(item => item.isDirectory())
+            .filter(item => !item.name.startsWith('.') && item.name !== 'node_modules')
+            .map(item => {
+              const fullPath = path.join(dirPath, item.name);
+              return analyzeDirectory(item.name, fullPath);
+            });
+        }
+        
+        // 分析目录信息
+        function analyzeDirectory(dirName, dirPath) {
+          const stats = fs.statSync(dirPath);
+          let description = '暂无描述';
+          let tags = [];
+          let category = 'other';
+          let fileCount = 0;
+          
+          try {
+            // 计算文件数量
+            const files = fs.readdirSync(dirPath, { recursive: true });
+            fileCount = files.filter(file => {
+              const filePath = path.join(dirPath, file);
+              return fs.statSync(filePath).isFile();
+            }).length;
+          } catch (e) {
+            console.warn(`无法读取目录 ${dirName}:`, e.message);
+          }
+          
+          // 尝试读取 README 文件
+          const readmeFiles = ['README.md', 'readme.md', 'README.txt', 'readme.txt'];
+          for (const readmeFile of readmeFiles) {
+            const readmePath = path.join(dirPath, readmeFile);
+            if (fs.existsSync(readmePath)) {
+              try {
+                const content = fs.readFileSync(readmePath, 'utf8');
+                const lines = content.split('\n').filter(line => line.trim());
+                // 找到第一个非标题行作为描述
+                const descLine = lines.find(line => 
+                  line.trim() && 
+                  !line.startsWith('#') && 
+                  !line.startsWith('!') &&
+                  line.length > 10
+                );
+                if (descLine) {
+                  description = descLine.trim().substring(0, 150);
+                }
+              } catch (e) {
+                console.warn(`读取 README 失败: ${readmePath}`);
+              }
+              break;
+            }
+          }
+          
+          // 尝试读取 package.json
+          const packagePath = path.join(dirPath, 'package.json');
+          if (fs.existsSync(packagePath)) {
+            try {
+              const packageData = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+              if (packageData.description) {
+                description = packageData.description;
+              }
+              if (packageData.keywords && Array.isArray(packageData.keywords)) {
+                tags = packageData.keywords.slice(0, 4);
+              }
+              category = 'frontend';
+            } catch (e) {
+              console.warn(`解析 package.json 失败: ${packagePath}`);
+            }
+          }
+          
+          // 根据目录名推断分类
+          const dirNameLower = dirName.toLowerCase();
+          if (dirNameLower.includes('template') || dirNameLower.includes('starter')) {
+            category = 'template';
+            tags = [...tags, '模板'];
+          } else if (dirNameLower.includes('api') || dirNameLower.includes('backend') || dirNameLower.includes('server')) {
+            category = 'api';
+            tags = [...tags, 'API', '后端'];
+          } else if (dirNameLower.includes('database') || dirNameLower.includes('db') || dirNameLower.includes('sql')) {
+            category = 'database';
+            tags = [...tags, '数据库'];
+          } else if (dirNameLower.includes('deploy') || dirNameLower.includes('docker') || dirNameLower.includes('k8s') || dirNameLower.includes('kubernetes')) {
+            category = 'devops';
+            tags = [...tags, '部署', 'DevOps'];
+          } else if (dirNameLower.includes('frontend') || dirNameLower.includes('web') || dirNameLower.includes('ui')) {
+            category = 'frontend';
+            tags = [...tags, '前端'];
+          }
+          
+          // 去重标签
+          tags = [...new Set(tags)];
+          
+          // 获取图标和颜色
+          const { icon, color } = getCategoryStyle(category);
+          
+          return {
+            name: dirName,
+            description,
+            createdAt: stats.birthtime.toISOString(),
+            updatedAt: stats.mtime.toISOString(),
+            fileCount,
+            tags,
+            status: 'active',
+            category,
+            icon,
+            color
+          };
+        }
+        
+        // 获取分类样式
+        function getCategoryStyle(category) {
+          const styleMap = {
+            template: { icon: 'Document', color: '#409EFF' },
+            api: { icon: 'Setting', color: '#67C23A' },
+            database: { icon: 'DataBoard', color: '#E6A23C' },
+            devops: { icon: 'Folder', color: '#F56C6C' },
+            frontend: { icon: 'Document', color: '#409EFF' },
+            backend: { icon: 'Setting', color: '#67C23A' },
+            other: { icon: 'Folder', color: '#95a5a6' }
+          };
+          return styleMap[category] || styleMap.other;
+        }
+        
+        // 主函数
+        function main() {
+          try {
+            const directories = getDirectories('.');
+            const data = {
+              lastUpdate: new Date().toISOString(),
+              totalCount: directories.length,
+              directories
+            };
+            
+            // 写入到 public 目录，供前端访问
+            if (!fs.existsSync('public')) {
+              fs.mkdirSync('public', { recursive: true });
+            }
+            
+            fs.writeFileSync('public/directories.json', JSON.stringify(data, null, 2));
+            console.log(`成功生成目录信息，共 ${directories.length} 个目录`);
+            
+            // 输出目录列表供调试
+            directories.forEach(dir => {
+              console.log(`- ${dir.name} (${dir.category}): ${dir.description.substring(0, 50)}...`);
+            });
+          } catch (error) {
+            console.error('生成目录信息失败:', error);
+            process.exit(1);
+          }
+        }
+        
+        main();
+        EOF
+        
+        # 运行脚本生成目录信息
+        node generate-directories.js
+        
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add public/directories.json
+        if git diff --staged --quiet; then
+          echo "没有变化需要提交"
+        else
+          git commit -m "自动更新目录信息 [skip ci]"
+          git push
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Deploy to GitHub Pages
+      if: github.ref == 'refs/heads/main'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist
+        # 如果你使用 Vite 构建，需要先构建项目
+        # 这里假设你已经配置了构建步骤

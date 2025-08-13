@@ -1,0 +1,54 @@
+{
+  "lastUpdate": "2024-01-20T10:30:00Z",
+  "totalCount": 4,
+  "directories": [
+    {
+      "name": "frontend-templates",
+      "description": "前端项目模板集合，包含 Vue、React、Angular 等框架的起始模板，帮助快速搭建现代化的前端应用",
+      "createdAt": "2024-01-15T10:30:00Z",
+      "updatedAt": "2024-01-20T15:45:00Z",
+      "fileCount": 25,
+      "tags": ["前端", "Vue", "React", "模板"],
+      "status": "active",
+      "category": "template",
+      "icon": "Document",
+      "color": "#409EFF"
+    },
+    {
+      "name": "backend-apis",
+      "description": "RESTful API 设计规范和示例代码，包含用户认证、权限管理、数据库操作等常用功能的完整实现",
+      "createdAt": "2024-01-10T09:15:00Z",
+      "updatedAt": "2024-01-18T11:20:00Z",
+      "fileCount": 18,
+      "tags": ["后端", "API", "Node.js", "Express"],
+      "status": "active",
+      "category": "api",
+      "icon": "Setting",
+      "color": "#67C23A"
+    },
+    {
+      "name": "database-schemas",
+      "description": "数据库设计方案和迁移脚本，支持 MySQL、PostgreSQL、MongoDB 等主流数据库的表结构设计",
+      "createdAt": "2024-01-08T14:22:00Z",
+      "updatedAt": "2024-01-16T16:30:00Z",
+      "fileCount": 12,
+      "tags": ["数据库", "MySQL", "PostgreSQL", "Schema"],
+      "status": "static",
+      "category": "database",
+      "icon": "DataBoard",
+      "color": "#E6A23C"
+    },
+    {
+      "name": "deployment-configs",
+      "description": "Docker 容器化配置、Kubernetes 部署文件、CI/CD 流水线脚本，实现应用的自动化部署和运维",
+      "createdAt": "2024-01-05T08:45:00Z",
+      "updatedAt": "2024-01-19T13:15:00Z",
+      "fileCount": 31,
+      "tags": ["部署", "Docker", "K8s", "CI/CD"],
+      "status": "active",
+      "category": "devops",
+      "icon": "Folder",
+      "color": "#F56C6C"
+    }
+  ]
+}

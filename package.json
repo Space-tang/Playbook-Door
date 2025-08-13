@@ -1,0 +1,30 @@
+{
+  "name": "playbook-door",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "动态目录展示平台，自动同步 GitHub 仓库中的目录结构",
+  "keywords": ["vue", "github", "directory", "showcase", "automation"],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "npm run build && gh-pages -d dist"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
+    "element-plus": "^2.10.7",
+    "vue": "^3.5.18",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.1",
+    "vite": "^7.1.2",
+    "gh-pages": "^6.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Space-tang/Playbook-Door.git"
+  },
+  "homepage": "https://space-tang.github.io/Playbook-Door/"
+}
