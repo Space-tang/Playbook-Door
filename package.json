@@ -2,7 +2,6 @@
   "name": "playbook-door",
   "private": true,
   "version": "1.0.0",
-  "type": "module",
   "description": "动态目录展示平台，自动同步 GitHub 仓库中的目录结构",
   "keywords": ["vue", "github", "directory", "showcase", "automation"],
   "scripts": {
