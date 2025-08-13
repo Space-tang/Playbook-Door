@@ -1,12 +1,12 @@
 {
-  "lastUpdate": "2025-08-13T10:00:23.262Z",
-  "totalCount": 2,
+  "lastUpdate": "2025-08-13T10:11:28.362Z",
+  "totalCount": 3,
   "directories": [
     {
       "name": "My First Post",
       "description": "Docker 容器化配置、Kubernetes 部署文件、CI/CD 流水线脚本，实现应用的自动化部署和运维",
-      "createdAt": "2025-08-13T09:26:42.974Z",
-      "updatedAt": "2025-08-13T09:26:42.976Z",
+      "createdAt": "2025-08-13T10:11:14.802Z",
+      "updatedAt": "2025-08-13T10:11:14.802Z",
       "fileCount": 1,
       "tags": [
         "Docker",
@@ -20,14 +20,28 @@
     {
       "name": "测试",
       "description": "现在是测试场景",
-      "createdAt": "2025-08-13T09:53:28.990Z",
-      "updatedAt": "2025-08-13T09:53:48.203Z",
+      "createdAt": "2025-08-13T10:11:14.804Z",
+      "updatedAt": "2025-08-13T10:11:14.804Z",
       "fileCount": 1,
       "tags": [
         "测试1"
       ],
       "status": "active",
       "category": "测试1",
+      "icon": "Document",
+      "color": "#409EFF"
+    },
+    {
+      "name": "测试3",
+      "description": "现在是测试场景",
+      "createdAt": "2025-08-13T10:11:14.804Z",
+      "updatedAt": "2025-08-13T10:11:14.804Z",
+      "fileCount": 1,
+      "tags": [
+        "测试3"
+      ],
+      "status": "active",
+      "category": "测试3",
       "icon": "Document",
       "color": "#409EFF"
     }
