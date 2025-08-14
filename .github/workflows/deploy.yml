@@ -105,20 +105,22 @@ jobs:
           echo "❌ 未找到 directories.json 文件"
         fi
         
-    - name: Prepare for deployment
+    - name: Update submodule reference in parent repo
       run: |
-        echo "📦 准备部署最新内容..."
-        echo "📊 当前 directories.json 状态:"
-        if [ -f public/directories.json ]; then
-          echo "✅ directories.json 文件存在"
-          node -e "
-            const data = JSON.parse(require('fs').readFileSync('public/directories.json', 'utf8'));
-            console.log('📈 项目总数:', data.totalCount);
-            console.log('🕐 最后更新:', data.lastUpdate);
-          "
+        # 只提交 submodule 更改（如果有）
+        if ! git diff --quiet --cached playbook; then
+          echo "📝 提交 submodule 更新到父仓库..."
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          git commit -m "🔄 自动更新 submodule 到最新版本 [skip ci]"
+          git push origin main
+          echo "✅ Submodule 引用已更新"
         else
-          echo "❌ directories.json 文件不存在"
+          echo "📋 Submodule 没有变化"
         fi
+        
+        echo "📊 directories.json 将用于构建，不提交到仓库"
         
     - name: Build application
       run: npm run build
@@ -135,32 +137,3 @@ jobs:
       id: deployment
       uses: actions/deploy-pages@v4
       
-    - name: Commit changes after successful deployment
-      if: always()
-      run: |
-        # 检查是否有需要提交的更改
-        if ! git diff --quiet --cached playbook || ! git diff --quiet public/directories.json; then
-          echo "📝 部署完成，现在提交更改到仓库..."
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          
-          # 添加所有更改
-          git add public/directories.json
-          
-          # 创建提交信息
-          COMMIT_MSG="🤖 自动更新"
-          if git diff --cached --quiet playbook; then
-            COMMIT_MSG="$COMMIT_MSG 目录数据"
-          else
-            COMMIT_MSG="$COMMIT_MSG submodule 和目录数据"
-          fi
-          COMMIT_MSG="$COMMIT_MSG [skip ci]"
-          
-          git commit -m "$COMMIT_MSG" || echo "没有需要提交的更改"
-          
-          # 推送更改
-          echo "📤 推送更改到远程仓库..."
-          git push origin main || echo "推送失败或没有更改"
-        else
-          echo "📋 没有需要提交的更改"
-        fi
