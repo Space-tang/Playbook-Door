@@ -76,6 +76,17 @@ jobs:
         fi
         
         echo "🔍 开始扫描项目目录..."
+        echo "📁 检查 playbook 目录状态..."
+        if [ -d "playbook" ]; then
+          echo "✅ playbook 目录存在"
+          echo "📂 playbook 目录内容:"
+          ls -la playbook/
+          echo "🔍 查找 __meta__.txt 文件:"
+          find playbook/ -name "__meta__.txt" -type f || echo "❌ 未找到 __meta__.txt 文件"
+        else
+          echo "❌ playbook 目录不存在"
+        fi
+        
         npm run generate
         echo "📊 扫描完成"
         
@@ -94,41 +105,29 @@ jobs:
           echo "❌ 未找到 directories.json 文件"
         fi
         
-    - name: Check for changes
-      id: changes
+    - name: Check for submodule changes
+      id: submodule_changes
       run: |
-        # 检查是否有任何更改（submodule 或 directories.json）
-        if git diff --quiet --cached && git diff --quiet public/directories.json; then
+        # 只检查 submodule 更改，数据文件不提交
+        if git diff --quiet --cached playbook; then
           echo "changed=false" >> $GITHUB_OUTPUT
-          echo "📋 没有检测到任何变化"
+          echo "📋 Submodule 没有变化"
         else
           echo "changed=true" >> $GITHUB_OUTPUT
-          echo "✨ 检测到变化"
+          echo "✨ 检测到 submodule 变化"
           git status --porcelain
         fi
         
-    - name: Commit all changes
-      if: steps.changes.outputs.changed == 'true'
+    - name: Commit submodule changes
+      if: steps.submodule_changes.outputs.changed == 'true'
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         
-        # 添加所有更改
-        git add public/directories.json
+        git commit -m "🔄 自动更新 submodule 到最新版本 [skip ci]"
         
-        # 创建提交信息
-        COMMIT_MSG="🤖 自动更新"
-        if git diff --cached --quiet playbook; then
-          COMMIT_MSG="$COMMIT_MSG 目录数据"
-        else
-          COMMIT_MSG="$COMMIT_MSG submodule 和目录数据"
-        fi
-        COMMIT_MSG="$COMMIT_MSG [skip ci]"
-        
-        git commit -m "$COMMIT_MSG"
-        
-        # 推送更改
-        echo "📤 推送更改到远程仓库..."
+        # 推送 submodule 更改
+        echo "📤 推送 submodule 更改到远程仓库..."
         git push origin main
         
     - name: Build application
