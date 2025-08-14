@@ -105,29 +105,60 @@ jobs:
           echo "❌ 未找到 directories.json 文件"
         fi
         
-    - name: Check for submodule changes
-      id: submodule_changes
+    - name: Check for changes
+      id: changes
       run: |
-        # 只检查 submodule 更改，数据文件不提交
-        if git diff --quiet --cached playbook; then
-          echo "changed=false" >> $GITHUB_OUTPUT
-          echo "📋 Submodule 没有变化"
-        else
-          echo "changed=true" >> $GITHUB_OUTPUT
+        # 检查是否有任何更改（submodule 或 directories.json）
+        HAS_SUBMODULE_CHANGES=false
+        HAS_DATA_CHANGES=false
+        
+        if ! git diff --quiet --cached playbook; then
+          HAS_SUBMODULE_CHANGES=true
           echo "✨ 检测到 submodule 变化"
-          git status --porcelain
         fi
         
-    - name: Commit submodule changes
-      if: steps.submodule_changes.outputs.changed == 'true'
+        if ! git diff --quiet public/directories.json; then
+          HAS_DATA_CHANGES=true
+          echo "✨ 检测到数据文件变化"
+        fi
+        
+        if [ "$HAS_SUBMODULE_CHANGES" = true ] || [ "$HAS_DATA_CHANGES" = true ]; then
+          echo "changed=true" >> $GITHUB_OUTPUT
+          echo "需要提交更改"
+        else
+          echo "changed=false" >> $GITHUB_OUTPUT
+          echo "📋 没有检测到任何变化"
+        fi
+        
+    - name: Commit all changes
+      if: steps.changes.outputs.changed == 'true'
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         
-        git commit -m "🔄 自动更新 submodule 到最新版本 [skip ci]"
+        # 添加所有更改
+        git add public/directories.json
         
-        # 推送 submodule 更改
-        echo "📤 推送 submodule 更改到远程仓库..."
+        # 创建提交信息
+        COMMIT_MSG="🤖 自动更新"
+        if git diff --cached --quiet playbook; then
+          COMMIT_MSG="$COMMIT_MSG 目录数据"
+        else
+          COMMIT_MSG="$COMMIT_MSG submodule 和目录数据"
+        fi
+        
+        # 关键：检查触发来源，只有 repository_dispatch 时才使用 [skip ci]
+        if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+          COMMIT_MSG="$COMMIT_MSG [skip ci]"
+          echo "📝 来自子仓库触发，使用 [skip ci] 避免循环"
+        else
+          echo "📝 来自其他触发源，允许后续 CI"
+        fi
+        
+        git commit -m "$COMMIT_MSG"
+        
+        # 推送更改
+        echo "📤 推送更改到远程仓库..."
         git push origin main
         
     - name: Build application
