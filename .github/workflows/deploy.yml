@@ -61,13 +61,17 @@ jobs:
         echo "📍 当前 submodule commit: $(git rev-parse HEAD)"
         echo "📍 远程最新 commit: $(git rev-parse origin/main)"
         
-        # 如果还不是最新的，强制更新
-        if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]; then
-          echo "⚠️ 本地不是最新版本，强制更新..."
-          git fetch origin
-          git reset --hard origin/main
-        fi
+        # 强制更新到最新版本
+        echo "🔄 强制更新到最新版本..."
+        git fetch origin
+        git reset --hard origin/main
+        
+        # 再次确认
+        echo "✅ 更新后的 commit: $(git rev-parse HEAD)"
         cd ..
+        
+        # 等待一下，确保文件系统同步
+        sleep 2
         
         # 暂存 submodule 更新，稍后一起提交
         if ! git diff --quiet playbook; then
@@ -83,10 +87,29 @@ jobs:
           ls -la playbook/
           echo "🔍 查找 __meta__.txt 文件:"
           find playbook/ -name "__meta__.txt" -type f || echo "❌ 未找到 __meta__.txt 文件"
+          
+          echo "📋 检查几个具体文件的内容:"
+          if [ -f "playbook/test11/__meta__.txt" ]; then
+            echo "=== test11/__meta__.txt 内容 ==="
+            cat playbook/test11/__meta__.txt
+            echo "=========================="
+          fi
+          
+          if [ -f "playbook/test10/__meta__.txt" ]; then
+            echo "=== test10/__meta__.txt 内容 ==="
+            cat playbook/test10/__meta__.txt
+            echo "=========================="
+          fi
         else
           echo "❌ playbook 目录不存在"
         fi
         
+        # 清理可能的缓存
+        echo "🧹 清理缓存..."
+        rm -f public/directories.json
+        
+        # 运行生成脚本
+        echo "🚀 运行目录生成脚本..."
         npm run generate
         echo "📊 扫描完成"
         
