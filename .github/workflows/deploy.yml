@@ -193,6 +193,8 @@ jobs:
       uses: actions/configure-pages@v4
       with:
         enablement: true
+        token: ${{ secrets.GITHUB_TOKEN }}
+      continue-on-error: true
       
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
@@ -202,4 +204,20 @@ jobs:
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4
+      continue-on-error: true
+      
+    - name: Output deployment result
+      run: |
+        if [ "${{ steps.deployment.outcome }}" = "success" ]; then
+          echo "✅ 部署成功！"
+          echo "🌐 网站地址: ${{ steps.deployment.outputs.page_url }}"
+        else
+          echo "❌ 部署失败，请手动启用 GitHub Pages："
+          echo "1. 进入仓库 Settings → Pages"
+          echo "2. Source 选择 'GitHub Actions'"
+          echo "3. 重新运行此 workflow"
+          echo ""
+          echo "📋 构建产物已生成在 dist/ 目录中"
+          echo "📊 directories.json 文件已更新"
+        fi
       
