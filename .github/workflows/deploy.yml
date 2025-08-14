@@ -69,13 +69,10 @@ jobs:
         fi
         cd ..
         
-        # 提交 submodule 更新到父仓库
+        # 暂存 submodule 更新，稍后一起提交
         if ! git diff --quiet playbook; then
-          echo "📝 提交 submodule 更新..."
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          echo "📝 暂存 submodule 更新..."
           git add playbook
-          git commit -m "🔄 自动更新 submodule 到最新版本 [skip ci]"
         fi
         
         echo "🔍 开始扫描项目目录..."
@@ -97,25 +94,42 @@ jobs:
           echo "❌ 未找到 directories.json 文件"
         fi
         
-    - name: Check for data changes
+    - name: Check for changes
       id: changes
       run: |
-        if git diff --quiet public/directories.json; then
+        # 检查是否有任何更改（submodule 或 directories.json）
+        if git diff --quiet --cached && git diff --quiet public/directories.json; then
           echo "changed=false" >> $GITHUB_OUTPUT
-          echo "📋 目录数据没有变化"
+          echo "📋 没有检测到任何变化"
         else
           echo "changed=true" >> $GITHUB_OUTPUT
-          echo "✨ 检测到目录数据变化"
+          echo "✨ 检测到变化"
+          git status --porcelain
         fi
         
-    - name: Commit updated data
+    - name: Commit all changes
       if: steps.changes.outputs.changed == 'true'
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
+        
+        # 添加所有更改
         git add public/directories.json
-        git commit -m "🤖 自动更新目录数据 [skip ci]"
-        git push
+        
+        # 创建提交信息
+        COMMIT_MSG="🤖 自动更新"
+        if git diff --cached --quiet playbook; then
+          COMMIT_MSG="$COMMIT_MSG 目录数据"
+        else
+          COMMIT_MSG="$COMMIT_MSG submodule 和目录数据"
+        fi
+        COMMIT_MSG="$COMMIT_MSG [skip ci]"
+        
+        git commit -m "$COMMIT_MSG"
+        
+        # 推送更改
+        echo "📤 推送更改到远程仓库..."
+        git push origin main
         
     - name: Build application
       run: npm run build
