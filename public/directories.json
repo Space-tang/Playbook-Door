@@ -1,13 +1,13 @@
 {
-  "lastUpdate": "2025-08-14T03:02:57.686Z",
-  "totalCount": 6,
+  "lastUpdate": "2025-08-14T03:13:22.660Z",
+  "totalCount": 5,
   "directories": [
     {
       "name": "测试1",
       "directoryName": "test1",
       "description": "现在是测试场景111",
-      "createdAt": "2025-08-14T03:02:42.240Z",
-      "updatedAt": "2025-08-14T03:02:42.240Z",
+      "createdAt": "2025-08-14T03:13:11.570Z",
+      "updatedAt": "2025-08-14T03:13:11.570Z",
       "fileCount": 1,
       "tags": [
         "测试1"
@@ -21,8 +21,8 @@
       "name": "测试2",
       "directoryName": "test2",
       "description": "现在是测试场景222",
-      "createdAt": "2025-08-14T03:02:42.240Z",
-      "updatedAt": "2025-08-14T03:02:42.240Z",
+      "createdAt": "2025-08-14T03:13:11.570Z",
+      "updatedAt": "2025-08-14T03:13:11.570Z",
       "fileCount": 1,
       "tags": [
         "测试2"
@@ -36,8 +36,8 @@
       "name": "测试3",
       "directoryName": "test3",
       "description": "现在是测试场333",
-      "createdAt": "2025-08-14T03:02:42.240Z",
-      "updatedAt": "2025-08-14T03:02:42.240Z",
+      "createdAt": "2025-08-14T03:13:11.570Z",
+      "updatedAt": "2025-08-14T03:13:11.570Z",
       "fileCount": 1,
       "tags": [
         "测试3"
@@ -49,25 +49,10 @@
     },
     {
       "name": "测试4",
-      "directoryName": "test4",
-      "description": "现在是测试场景44",
-      "createdAt": "2025-08-14T03:02:42.240Z",
-      "updatedAt": "2025-08-14T03:02:42.240Z",
-      "fileCount": 1,
-      "tags": [
-        "测试4"
-      ],
-      "status": "active",
-      "category": "测试4",
-      "icon": "Document",
-      "color": "#409EFF"
-    },
-    {
-      "name": "测试4",
       "directoryName": "test5",
       "description": "现在是测试场景44",
-      "createdAt": "2025-08-14T03:02:42.240Z",
-      "updatedAt": "2025-08-14T03:02:42.240Z",
+      "createdAt": "2025-08-14T03:13:11.570Z",
+      "updatedAt": "2025-08-14T03:13:11.570Z",
       "fileCount": 1,
       "tags": [
         "测试4"
@@ -81,8 +66,8 @@
       "name": "测试4",
       "directoryName": "test6",
       "description": "现在是测试场景44",
-      "createdAt": "2025-08-14T03:02:42.240Z",
-      "updatedAt": "2025-08-14T03:02:42.240Z",
+      "createdAt": "2025-08-14T03:13:11.570Z",
+      "updatedAt": "2025-08-14T03:13:11.570Z",
       "fileCount": 1,
       "tags": [
         "测试4"
