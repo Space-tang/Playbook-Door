@@ -50,23 +50,37 @@ jobs:
     - name: Install dependencies
       run: npm install
         
-    - name: Update submodule and generate directories data
+    - name: Update submodule to latest and generate directories data
       run: |
-        echo "🔄 更新 submodule..."
-        # 确保 submodule 存在并更新到最新版本
-        if [ -d "playbook/.git" ]; then
-          echo "📁 Submodule 已存在，更新到最新版本..."
-          cd playbook
+        echo "🔄 强制更新 submodule 到最新版本..."
+        # 强制更新 submodule 到远程仓库的最新 commit
+        git submodule update --init --recursive --remote
+        
+        # 进入 submodule 目录确认更新
+        cd playbook
+        echo "📍 当前 submodule commit: $(git rev-parse HEAD)"
+        echo "📍 远程最新 commit: $(git rev-parse origin/main)"
+        
+        # 如果还不是最新的，强制更新
+        if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]; then
+          echo "⚠️ 本地不是最新版本，强制更新..."
           git fetch origin
           git reset --hard origin/main
-          cd ..
-        else
-          echo "🔧 初始化 submodule..."
-          git submodule update --init --recursive
         fi
+        cd ..
+        
+        # 提交 submodule 更新到父仓库
+        if ! git diff --quiet playbook; then
+          echo "📝 提交 submodule 更新..."
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add playbook
+          git commit -m "🔄 自动更新 submodule 到最新版本 [skip ci]"
+        fi
+        
         echo "🔍 开始扫描项目目录..."
         npm run generate
-        echo "� 扫描完成项"
+        echo "📊 扫描完成"
         
     - name: Show detected directories
       run: |
