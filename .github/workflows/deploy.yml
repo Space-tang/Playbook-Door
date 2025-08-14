@@ -127,7 +127,23 @@ jobs:
         else
           echo "❌ 未找到 directories.json 文件"
         fi
-        
+
+    - name: Commit directories.json to repository
+      run: |
+        # 检查 directories.json 是否存在且有变化
+        if [ -f "public/directories.json" ] && ! git diff --quiet public/directories.json; then
+          echo "📝 提交 directories.json 更新..."
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          git add public/directories.json
+          git commit -m "📊 自动更新目录数据 directories.json [skip ci]"
+          git push origin main
+          echo "✅ directories.json 已提交到仓库"
+        else
+          echo "📋 directories.json 无变化或不存在，不提交"
+        fi
+
     - name: Update submodule reference in parent repo
       run: |
         # 只提交 submodule 更改（如果有）
