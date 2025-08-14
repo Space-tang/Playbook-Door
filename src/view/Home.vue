@@ -28,8 +28,8 @@
 
                     <!-- 搜索栏 -->
                     <div class="hero-search">
-                        <el-input v-model="searchKeyword" placeholder="搜索项目" size="large" clearable
-                            class="search-input">
+                        <el-input v-model="searchKeyword" placeholder="搜索项目" size="large" clearable class="search-input"
+                            autocomplete="new-password" spellcheck="false" :name="`search-${Date.now()}`">
                             <template #prefix>
                                 <el-icon>
                                     <Search />
@@ -42,7 +42,7 @@
                 <!-- 统计数据 -->
                 <div class="hero-stats">
                     <div class="stat-card">
-                        <div class="stat-number">{{ filteredDirectories.length }}</div>
+                        <div class="stat-number">{{ directories.length }}</div>
                         <div class="stat-label">项目总数</div>
                     </div>
                     <div class="stat-card">
@@ -70,6 +70,9 @@
                 <!-- 分类标签 -->
                 <div class="filter-section">
                     <h3 class="section-title">浏览分类</h3>
+                    <div v-if="searchKeyword" class="search-result-info">
+                        找到 {{ filteredDirectories.length }} 个匹配的项目
+                    </div>
                     <div class="filter-tabs">
                         <el-button v-for="category in categories" :key="category.key"
                             :type="activeCategory === category.key ? 'primary' : ''"
@@ -97,7 +100,7 @@
 
                 <!-- 目录卡片网格 -->
                 <div class="directories-grid">
-                    <div v-for="directory in filteredDirectories" :key="directory.name" class="directory-card"
+                    <div v-for="directory in filteredDirectories" :key="directory.directoryName" class="directory-card"
                         @click="openDirectory(directory)">
                         <div class="card-left">
                             <div class="card-icon">
@@ -116,8 +119,8 @@
                             <p class="card-description">{{ directory.description }}</p>
 
                             <div class="card-tags-row">
-                                <el-tag v-for="tag in directory.tags.slice(0, 3)" :key="tag" size="small"
-                                    class="directory-tag">
+                                <el-tag v-for="(tag, index) in directory.tags.slice(0, 3)"
+                                    :key="`${directory.directoryName}-${index}`" size="small" class="directory-tag">
                                     {{ tag }}
                                 </el-tag>
                             </div>
@@ -229,13 +232,11 @@ const filteredDirectories = computed(() => {
         })
     }
 
-    // 按搜索关键词过滤
+    // 按搜索关键词过滤 - 只搜索标题
     if (searchKeyword.value) {
         const keyword = searchKeyword.value.toLowerCase()
         result = result.filter(d =>
-            d.name.toLowerCase().includes(keyword) ||
-            d.description.toLowerCase().includes(keyword) ||
-            d.tags.some(tag => tag.toLowerCase().includes(keyword))
+            d.name.toLowerCase().includes(keyword)
         )
     }
 

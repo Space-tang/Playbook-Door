@@ -196,6 +196,17 @@ body {
   margin-bottom: 48px;
 }
 
+.search-result-info {
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 16px;
+  padding: 8px 16px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
 .filter-tabs {
   display: flex;
   justify-content: center;
