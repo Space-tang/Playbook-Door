@@ -146,7 +146,32 @@ jobs:
         echo "📊 directories.json 将用于构建，不提交到仓库"
         
     - name: Build application
-      run: npm run build
+      run: |
+        echo "🔍 构建前检查 directories.json..."
+        if [ -f public/directories.json ]; then
+          echo "✅ public/directories.json 存在"
+          echo "📊 文件大小: $(wc -c < public/directories.json) bytes"
+          echo "🕐 最后修改: $(stat -c %y public/directories.json)"
+          echo "📋 项目数量:"
+          node -e "console.log('项目数:', JSON.parse(require('fs').readFileSync('public/directories.json', 'utf8')).totalCount)"
+        else
+          echo "❌ public/directories.json 不存在"
+        fi
+        
+        echo "🏗️ 开始构建应用..."
+        npm run build
+        
+        echo "🔍 构建后检查 dist 目录..."
+        if [ -f dist/directories.json ]; then
+          echo "✅ dist/directories.json 存在"
+          echo "📊 文件大小: $(wc -c < dist/directories.json) bytes"
+          echo "📋 项目数量:"
+          node -e "console.log('项目数:', JSON.parse(require('fs').readFileSync('dist/directories.json', 'utf8')).totalCount)"
+        else
+          echo "❌ dist/directories.json 不存在"
+          echo "📂 dist 目录内容:"
+          ls -la dist/
+        fi
       
     - name: Setup Pages
       uses: actions/configure-pages@v4

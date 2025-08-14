@@ -228,8 +228,9 @@ const refreshData = async () => {
 
 const fetchDirectoriesFromGitHub = async () => {
     try {
-        // 首先尝试从本地 JSON 文件获取数据
-        const response = await fetch('./directories.json')
+        // 首先尝试从本地 JSON 文件获取数据，添加时间戳避免缓存
+        const timestamp = new Date().getTime()
+        const response = await fetch(`./directories.json?t=${timestamp}`)
         if (response.ok) {
             const data = await response.json()
             // 处理目录数据，确保每个项目都有有效的分类
