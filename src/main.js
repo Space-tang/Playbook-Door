@@ -7,6 +7,9 @@ import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 
+// 导入全局样式
+import './style.css'
+
 console.log('🚀 Playbook Door 正在启动...')
 
 try {
