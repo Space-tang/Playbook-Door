@@ -189,32 +189,8 @@ jobs:
           ls -la dist/
         fi
       
-    - name: Check if Pages is enabled
-      id: check-pages
-      run: |
-        echo "🔍 检查 GitHub Pages 状态..."
-        # 尝试获取 Pages 信息
-        RESPONSE=$(curl -s -w "%{http_code}" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          "https://api.github.com/repos/${{ github.repository }}/pages")
-        
-        HTTP_CODE="${RESPONSE: -3}"
-        BODY="${RESPONSE%???}"
-        
-        if [ "$HTTP_CODE" = "200" ]; then
-          echo "✅ GitHub Pages 已启用"
-          echo "pages_enabled=true" >> $GITHUB_OUTPUT
-        elif [ "$HTTP_CODE" = "404" ]; then
-          echo "❌ GitHub Pages 未启用 (404)"
-          echo "pages_enabled=false" >> $GITHUB_OUTPUT
-        else
-          echo "⚠️  无法确定 Pages 状态 (HTTP $HTTP_CODE)，尝试部署..."
-          echo "pages_enabled=unknown" >> $GITHUB_OUTPUT
-        fi
-      
     - name: Setup Pages
-      if: steps.check-pages.outputs.pages_enabled != 'false'
       uses: actions/configure-pages@v4
-      continue-on-error: true
       
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
@@ -223,48 +199,5 @@ jobs:
         
     - name: Deploy to GitHub Pages
       id: deployment
-      if: steps.check-pages.outputs.pages_enabled != 'false'
       uses: actions/deploy-pages@v4
-      continue-on-error: true
-      
-    - name: Output deployment result
-      run: |
-        PAGES_STATUS="${{ steps.check-pages.outputs.pages_enabled }}"
-        DEPLOYMENT_OUTCOME="${{ steps.deployment.outcome }}"
-        
-        if [ "$PAGES_STATUS" = "true" ] && [ "$DEPLOYMENT_OUTCOME" = "success" ]; then
-          echo "✅ 部署成功！"
-          echo "🌐 网站地址: ${{ steps.deployment.outputs.page_url }}"
-        elif [ "$PAGES_STATUS" = "false" ]; then
-          echo "⚠️  GitHub Pages 未启用，无法自动部署"
-          echo ""
-          echo "📋 请按以下步骤手动启用 GitHub Pages："
-          echo "1. 点击链接: https://github.com/${{ github.repository }}/settings/pages"
-          echo "2. 在 'Source' 下拉菜单中选择 'GitHub Actions'"
-          echo "3. 点击 'Save' 保存设置"
-          echo "4. 返回 Actions 页面重新运行此工作流"
-          echo ""
-          echo "📊 构建产物已准备就绪，启用 Pages 后即可部署"
-        else
-          echo "❌ 部署失败"
-          echo "📋 可能的原因："
-          echo "- GitHub Pages 未正确配置"
-          echo "- 权限不足"
-          echo "- 仓库设置问题"
-          echo ""
-          echo "🔧 解决方案："
-          echo "1. 确认 Pages 设置: https://github.com/${{ github.repository }}/settings/pages"
-          echo "2. 检查 Actions 权限: Settings → Actions → General → Workflow permissions"
-          echo "3. 重新运行工作流"
-        fi
-        
-        echo ""
-        echo "📁 构建信息："
-        if [ -f "public/directories.json" ]; then
-          echo "- directories.json: $(wc -c < public/directories.json) bytes"
-          echo "- 项目数量: $(node -e "console.log(JSON.parse(require('fs').readFileSync('public/directories.json', 'utf8')).totalCount)")"
-        fi
-        if [ -d "dist" ]; then
-          echo "- 构建产物大小: $(du -sh dist | cut -f1)"
-        fi
       
