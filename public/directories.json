@@ -1,13 +1,13 @@
 {
-  "lastUpdate": "2025-08-15T03:16:00.864Z",
-  "totalCount": 12,
+  "lastUpdate": "2025-08-15T08:34:19.935Z",
+  "totalCount": 13,
   "directories": [
     {
       "name": "测试1",
       "directoryName": "test1",
       "description": "现在是测试场景111",
-      "createdAt": "2025-08-15T03:15:42.716Z",
-      "updatedAt": "2025-08-15T03:15:42.716Z",
+      "createdAt": "2025-08-15T08:34:06.648Z",
+      "updatedAt": "2025-08-15T08:34:06.648Z",
       "fileCount": 1,
       "tags": [
         "测试1"
@@ -21,8 +21,8 @@
       "name": "测试1",
       "directoryName": "test10",
       "description": "现在是测试场景111",
-      "createdAt": "2025-08-15T03:15:42.716Z",
-      "updatedAt": "2025-08-15T03:15:42.716Z",
+      "createdAt": "2025-08-15T08:34:06.648Z",
+      "updatedAt": "2025-08-15T08:34:06.648Z",
       "fileCount": 1,
       "tags": [
         "测试1"
@@ -36,8 +36,8 @@
       "name": "测试1",
       "directoryName": "test11",
       "description": "现在是测试场景111",
-      "createdAt": "2025-08-15T03:15:42.716Z",
-      "updatedAt": "2025-08-15T03:15:42.716Z",
+      "createdAt": "2025-08-15T08:34:06.648Z",
+      "updatedAt": "2025-08-15T08:34:06.648Z",
       "fileCount": 1,
       "tags": [
         "测试1"
@@ -51,8 +51,8 @@
       "name": "测试1",
       "directoryName": "test12",
       "description": "现在是测试场景111",
-      "createdAt": "2025-08-15T03:15:42.716Z",
-      "updatedAt": "2025-08-15T03:15:42.716Z",
+      "createdAt": "2025-08-15T08:34:06.648Z",
+      "updatedAt": "2025-08-15T08:34:06.648Z",
       "fileCount": 1,
       "tags": [
         "测试1"
@@ -66,8 +66,23 @@
       "name": "测试1",
       "directoryName": "test122",
       "description": "现在是测试场景111",
-      "createdAt": "2025-08-15T03:15:42.716Z",
-      "updatedAt": "2025-08-15T03:15:42.716Z",
+      "createdAt": "2025-08-15T08:34:06.648Z",
+      "updatedAt": "2025-08-15T08:34:06.648Z",
+      "fileCount": 1,
+      "tags": [
+        "测试1"
+      ],
+      "status": "active",
+      "category": "测试1",
+      "icon": "Document",
+      "color": "#409EFF"
+    },
+    {
+      "name": "测试1",
+      "directoryName": "test12333",
+      "description": "现在是测试场景111",
+      "createdAt": "2025-08-15T08:34:17.617Z",
+      "updatedAt": "2025-08-15T08:34:17.617Z",
       "fileCount": 1,
       "tags": [
         "测试1"
@@ -81,8 +96,8 @@
       "name": "测试2",
       "directoryName": "test2",
       "description": "现在是测试场景222",
-      "createdAt": "2025-08-15T03:15:42.716Z",
-      "updatedAt": "2025-08-15T03:15:42.716Z",
+      "createdAt": "2025-08-15T08:34:06.648Z",
+      "updatedAt": "2025-08-15T08:34:06.648Z",
       "fileCount": 1,
       "tags": [
         "测试2"
@@ -96,8 +111,8 @@
       "name": "测试3",
       "directoryName": "test3",
       "description": "现在是测试场333",
-      "createdAt": "2025-08-15T03:15:42.716Z",
-      "updatedAt": "2025-08-15T03:15:42.716Z",
+      "createdAt": "2025-08-15T08:34:06.648Z",
+      "updatedAt": "2025-08-15T08:34:06.648Z",
       "fileCount": 1,
       "tags": [
         "测试3"
@@ -111,8 +126,8 @@
       "name": "测试4",
       "directoryName": "test5",
       "description": "现在是测试场景44",
-      "createdAt": "2025-08-15T03:15:42.716Z",
-      "updatedAt": "2025-08-15T03:15:42.716Z",
+      "createdAt": "2025-08-15T08:34:06.648Z",
+      "updatedAt": "2025-08-15T08:34:06.648Z",
       "fileCount": 1,
       "tags": [
         "测试4"
@@ -126,8 +141,8 @@
       "name": "测试4",
       "directoryName": "test6",
       "description": "现在是测试场景44",
-      "createdAt": "2025-08-15T03:15:42.716Z",
-      "updatedAt": "2025-08-15T03:15:42.716Z",
+      "createdAt": "2025-08-15T08:34:06.648Z",
+      "updatedAt": "2025-08-15T08:34:06.648Z",
       "fileCount": 1,
       "tags": [
         "测试4"
@@ -141,8 +156,8 @@
       "name": "测试4",
       "directoryName": "test7",
       "description": "现在是测试场景44",
-      "createdAt": "2025-08-15T03:15:42.716Z",
-      "updatedAt": "2025-08-15T03:15:42.716Z",
+      "createdAt": "2025-08-15T08:34:06.648Z",
+      "updatedAt": "2025-08-15T08:34:06.648Z",
       "fileCount": 1,
       "tags": [
         "测试4"
@@ -156,8 +171,8 @@
       "name": "测试1",
       "directoryName": "test8",
       "description": "现在是测试场景111",
-      "createdAt": "2025-08-15T03:15:42.716Z",
-      "updatedAt": "2025-08-15T03:15:42.716Z",
+      "createdAt": "2025-08-15T08:34:06.648Z",
+      "updatedAt": "2025-08-15T08:34:06.648Z",
       "fileCount": 1,
       "tags": [
         "测试1"
@@ -171,8 +186,8 @@
       "name": "测试4",
       "directoryName": "test9",
       "description": "现在是测试场景44",
-      "createdAt": "2025-08-15T03:15:42.716Z",
-      "updatedAt": "2025-08-15T03:15:42.717Z",
+      "createdAt": "2025-08-15T08:34:06.648Z",
+      "updatedAt": "2025-08-15T08:34:06.649Z",
       "fileCount": 1,
       "tags": [
         "测试4"
