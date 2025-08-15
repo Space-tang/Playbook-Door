@@ -4,8 +4,8 @@
         <header class="header">
             <div class="header-content">
                 <div class="logo">
-                    <h1>Playbook Door</h1>
-                    <span class="subtitle">市场</span>
+                    <h1>PLAYBOOK MARKET</h1>
+                    <span class="subtitle">TKE</span>
                 </div>
                 <div class="header-actions">
                     <el-button type="primary" @click="openGithubRepo">
@@ -22,9 +22,8 @@
         <section class="hero-section">
             <div class="hero-content">
                 <div class="hero-text">
-                    <h2 class="hero-title">Playbook Door 开发者平台</h2>
-                    <p class="hero-subtitle">在 Playbook Door 市场发现 <strong>测试</strong>、<strong>工具</strong>、<strong>Agent
-                            策略</strong>、<strong>手册</strong> 和 <strong>部件</strong></p>
+                    <h2 class="hero-title">欢迎来到 TKE Playbook</h2>
+                    <p class="hero-subtitle">本网站汇集了 TKE 最新的最佳实践 Playbook。学习如何使用和构建基于低成本、全托管容器化平台自动扩展的应用。</p>
 
                     <!-- 搜索栏 -->
                     <div class="hero-search">

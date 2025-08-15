@@ -3,35 +3,20 @@ name: Build and Deploy to GitHub Pages
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
   workflow_dispatch:
-    inputs:
-      force_update:
-        description: '强制更新目录数据'
-        required: false
-        default: 'false'
-        type: boolean
-  # 当 submodule 更新时也触发
-  repository_dispatch:
-    types: [submodule-update]
   schedule:
-    # 每天凌晨 2 点自动运行一次，检查是否有新的项目
     - cron: '0 2 * * *'
 
-# 设置 GITHUB_TOKEN 的权限
 permissions:
   contents: write
   pages: write
   id-token: write
 
-# 只允许一个并发部署
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
-  # 构建和部署作业
   build-and-deploy:
     runs-on: ubuntu-latest
     
@@ -50,144 +35,20 @@ jobs:
     - name: Install dependencies
       run: npm install
         
-    - name: Update submodule to latest and generate directories data
+    - name: Update submodule and generate directories
       run: |
-        echo "🔄 强制更新 submodule 到最新版本..."
-        # 强制更新 submodule 到远程仓库的最新 commit
+        echo "🔄 更新 submodule..."
         git submodule update --init --recursive --remote
-        
-        # 进入 submodule 目录确认更新
         cd playbook
-        echo "📍 当前 submodule commit: $(git rev-parse HEAD)"
-        echo "📍 远程最新 commit: $(git rev-parse origin/main)"
-        
-        # 强制更新到最新版本
-        echo "🔄 强制更新到最新版本..."
         git fetch origin
         git reset --hard origin/main
-        
-        # 再次确认
-        echo "✅ 更新后的 commit: $(git rev-parse HEAD)"
         cd ..
         
-        # 等待一下，确保文件系统同步
-        sleep 2
-        
-        # 暂存 submodule 更新，稍后一起提交
-        if ! git diff --quiet playbook; then
-          echo "📝 暂存 submodule 更新..."
-          git add playbook
-        fi
-        
-        echo "🔍 开始扫描项目目录..."
-        echo "📁 检查 playbook 目录状态..."
-        if [ -d "playbook" ]; then
-          echo "✅ playbook 目录存在"
-          echo "📂 playbook 目录内容:"
-          ls -la playbook/
-          echo "🔍 查找 __meta__.txt 文件:"
-          find playbook/ -name "__meta__.txt" -type f || echo "❌ 未找到 __meta__.txt 文件"
-          
-          echo "📋 检查几个具体文件的内容:"
-          if [ -f "playbook/test11/__meta__.txt" ]; then
-            echo "=== test11/__meta__.txt 内容 ==="
-            cat playbook/test11/__meta__.txt
-            echo "=========================="
-          fi
-          
-          if [ -f "playbook/test10/__meta__.txt" ]; then
-            echo "=== test10/__meta__.txt 内容 ==="
-            cat playbook/test10/__meta__.txt
-            echo "=========================="
-          fi
-        else
-          echo "❌ playbook 目录不存在"
-        fi
-        
-        # 清理可能的缓存
-        echo "🧹 清理缓存..."
-        rm -f public/directories.json
-        
-        # 运行生成脚本
-        echo "🚀 运行目录生成脚本..."
+        echo "🚀 生成目录数据..."
         npm run generate
-        echo "📊 扫描完成"
-        
-    - name: Show detected directories
-      run: |
-        echo "📋 检测到的项目："
-        if [ -f public/directories.json ]; then
-          node -e "
-            const data = JSON.parse(require('fs').readFileSync('public/directories.json', 'utf8'));
-            console.log(\`总项目数: \${data.totalCount}\`);
-            data.directories.forEach(dir => {
-              console.log(\`  - \${dir.name} (分类: \${dir.category})\`);
-            });
-          "
-        else
-          echo "❌ 未找到 directories.json 文件"
-        fi
-
-    - name: Commit directories.json to repository
-      run: |
-        # 检查 directories.json 是否存在且有变化
-        if [ -f "public/directories.json" ] && ! git diff --quiet public/directories.json; then
-          echo "📝 提交 directories.json 更新..."
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          
-          git add public/directories.json
-          git commit -m "📊 自动更新目录数据 directories.json [skip ci]"
-          git push origin main
-          echo "✅ directories.json 已提交到仓库"
-        else
-          echo "📋 directories.json 无变化或不存在，不提交"
-        fi
-
-    - name: Update submodule reference in parent repo
-      run: |
-        # 只提交 submodule 更改（如果有）
-        if ! git diff --quiet --cached playbook; then
-          echo "📝 提交 submodule 更新到父仓库..."
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          
-          git commit -m "🔄 自动更新 submodule 到最新版本 [skip ci]"
-          git push origin main
-          echo "✅ Submodule 引用已更新"
-        else
-          echo "📋 Submodule 没有变化"
-        fi
-        
-        echo "📊 directories.json 将用于构建，不提交到仓库"
         
     - name: Build application
-      run: |
-        echo "🔍 构建前检查 directories.json..."
-        if [ -f public/directories.json ]; then
-          echo "✅ public/directories.json 存在"
-          echo "📊 文件大小: $(wc -c < public/directories.json) bytes"
-          echo "🕐 最后修改: $(stat -c %y public/directories.json)"
-          echo "📋 项目数量:"
-          node -e "console.log('项目数:', JSON.parse(require('fs').readFileSync('public/directories.json', 'utf8')).totalCount)"
-        else
-          echo "❌ public/directories.json 不存在"
-        fi
-        
-        echo "🏗️ 开始构建应用..."
-        npm run build
-        
-        echo "🔍 构建后检查 dist 目录..."
-        if [ -f dist/directories.json ]; then
-          echo "✅ dist/directories.json 存在"
-          echo "📊 文件大小: $(wc -c < dist/directories.json) bytes"
-          echo "📋 项目数量:"
-          node -e "console.log('项目数:', JSON.parse(require('fs').readFileSync('dist/directories.json', 'utf8')).totalCount)"
-        else
-          echo "❌ dist/directories.json 不存在"
-          echo "📂 dist 目录内容:"
-          ls -la dist/
-        fi
+      run: npm run build
       
     - name: Setup Pages
       uses: actions/configure-pages@v4
@@ -198,6 +59,4 @@ jobs:
         path: './dist'
         
     - name: Deploy to GitHub Pages
-      id: deployment
       uses: actions/deploy-pages@v4
-      
